@@ -11,6 +11,7 @@
     "orbital period (years)": 0.240846,
     "name": "mercury",
     "isNEO": "FALSE",
+    "isPHA": "FALSE",
     "texture": "2k_mercury.jpg",
     "rotation period (hours)": 1407.6,
     "rotation direction": "prograde"
@@ -27,6 +28,7 @@
     "orbital period (years)": 0.615,
     "name": "Venus",
     "isNEO": "FALSE",
+    "isPHA": "FALSE",
     "texture": "2k_venus_surface.jpg",
     "rotation period (hours)": 5832.5,
     "rotation direction": "retrograde"
@@ -44,6 +46,7 @@
     "orbital period (years)": 1,
     "name": "Earth",
     "isNEO": "FALSE",
+    "isPHA": "FALSE",
     "texture": "2k_earth_daymap.jpg",
     "rotation period (hours)": 24,
     "rotation direction": "prograde"
@@ -61,6 +64,7 @@
     "orbital period (years)": 1.881,
     "name": "Mars",
     "isNEO": "FALSE",
+    "isPHA": "FALSE",
     "texture": "2k_mars.jpg",
     "rotation period (hours)": 24.6,
     "rotation direction": "prograde"
@@ -77,6 +81,7 @@
     "orbital period (years)": 11.86,
     "name": "Jupiter",
     "isNEO": "FALSE",
+    "isPHA": "FALSE",
     "texture": "2k_jupiter.jpg",
     "rotation period (hours)": 9.9,
     "rotation direction": "prograde"
@@ -93,6 +98,7 @@
     "orbital period (years)": 29.46,
     "name": "Saturn",
     "isNEO": "FALSE",
+    "isPHA": "FALSE",
     "texture": "2k_saturn.jpg",
     "rotation period (hours)": 10.7,
     "rotation direction": "prograde"
@@ -109,6 +115,7 @@
     "orbital period (years)": 84.01,
     "name": "Uranus",
     "isNEO": "FALSE",
+    "isPHA": "FALSE",
     "texture": "2k_uranus.jpg",
     "rotation period (hours)": 17.2,
     "rotation direction": "retrograde"
@@ -125,6 +132,7 @@
     "orbital period (years)": 164.79,
     "name": "Neptune",
     "isNEO": "FALSE",
+    "isPHA": "FALSE",
     "texture": "2k_neptune.jpg",
     "rotation period (hours)": 16.1,
     "rotation direction": "prograde"
@@ -141,6 +149,7 @@
     "orbital period (years)": 0.55,
     "name": "Atira",
     "isNEO": "TRUE",
+    "isPHA": "FALSE",
     "texture": "2k_haumea_fictional.jpg",
     "rotation period (hours)": 24,
     "rotation direction": "prograde"
@@ -157,6 +166,7 @@
     "orbital period (years)": 0.485301847,
     "name": "164294 2004 XZ130",
     "isNEO": "TRUE",
+    "isPHA": "FALSE",
     "texture": "2k_haumea_fictional.jpg",
     "rotation period (hours)": 24,
     "rotation direction": "prograde"
@@ -173,6 +183,7 @@
     "orbital period (years)": 0.483415725,
     "name": "418265 2008 EA32",
     "isNEO": "TRUE",
+    "isPHA": "FALSE",
     "texture": "2k_haumea_fictional.jpg",
     "rotation period (hours)": 24,
     "rotation direction": "prograde"
@@ -189,6 +200,7 @@
     "orbital period (years)": 0.5624129,
     "name": "413563 2005 TG45",
     "isNEO": "TRUE",
+    "isPHA": "FALSE",
     "texture": "2k_haumea_fictional.jpg",
     "rotation period (hours)": 24,
     "rotation direction": "prograde"
@@ -205,6 +217,7 @@
     "orbital period (years)": 0.413913124,
     "name": "594913 Aylo\\'chaxnim 2020 AV2",
     "isNEO": "TRUE",
+    "isPHA": "FALSE",
     "texture": "2k_haumea_fictional.jpg",
     "rotation period (hours)": 24,
     "rotation direction": "prograde"
@@ -221,6 +234,7 @@
     "orbital period (years)": 0.579424582,
     "name": "481817 2008 UL90",
     "isNEO": "TRUE",
+    "isPHA": "TRUE",
     "texture": "2k_haumea_fictional.jpg",
     "rotation period (hours)": 24,
     "rotation direction": "prograde"
@@ -237,6 +251,7 @@
     "orbital period (years)": 0.695231082,
     "name": "613676 2006 WE4",
     "isNEO": "TRUE",
+    "isPHA": "FALSE",
     "texture": "2k_haumea_fictional.jpg",
     "rotation period (hours)": 24,
     "rotation direction": "prograde"
@@ -253,6 +268,7 @@
     "orbital period (years)": 0.50622794,
     "name": "434326 2004 JG6",
     "isNEO": "TRUE",
+    "isPHA": "TRUE",
     "texture": "2k_haumea_fictional.jpg",
     "rotation period (hours)": 24,
     "rotation direction": "prograde"
@@ -269,6 +285,7 @@
     "orbital period (years)": 0.505317944,
     "name": "678861 2017 YH",
     "isNEO": "TRUE",
+    "isPHA": "FALSE",
     "texture": "2k_haumea_fictional.jpg",
     "rotation period (hours)": 24,
     "rotation direction": "prograde"
@@ -285,6 +302,7 @@
     "orbital period (years)": 0.575982727,
     "name": "1998 DK36",
     "isNEO": "TRUE",
+    "isPHA": "FALSE",
     "texture": "2k_haumea_fictional.jpg",
     "rotation period (hours)": 24,
     "rotation direction": "prograde"
@@ -301,6 +319,7 @@
     "orbital period (years)": 0.485922769,
     "name": "2010 XB11",
     "isNEO": "TRUE",
+    "isPHA": "FALSE",
     "texture": "2k_haumea_fictional.jpg",
     "rotation period (hours)": 24,
     "rotation direction": "prograde"
@@ -317,6 +336,7 @@
     "orbital period (years)": 0.602173781,
     "name": "2012 VE46",
     "isNEO": "TRUE",
+    "isPHA": "TRUE",
     "texture": "2k_haumea_fictional.jpg",
     "rotation period (hours)": 24,
     "rotation direction": "prograde"
@@ -333,6 +353,7 @@
     "orbital period (years)": 0.465689703,
     "name": "2013 JX28",
     "isNEO": "TRUE",
+    "isPHA": "FALSE",
     "texture": "2k_haumea_fictional.jpg",
     "rotation period (hours)": 24,
     "rotation direction": "prograde"
@@ -349,6 +370,7 @@
     "orbital period (years)": 0.680496266,
     "name": "2013 TQ5",
     "isNEO": "TRUE",
+    "isPHA": "FALSE",
     "texture": "2k_haumea_fictional.jpg",
     "rotation period (hours)": 24,
     "rotation direction": "prograde"
@@ -365,6 +387,7 @@
     "orbital period (years)": 0.651097707,
     "name": "2014 FO47",
     "isNEO": "TRUE",
+    "isPHA": "TRUE ",
     "texture": "2k_haumea_fictional.jpg",
     "rotation period (hours)": 24,
     "rotation direction": "prograde"
@@ -381,6 +404,7 @@
     "orbital period (years)": 0.544312963,
     "name": "2015 DR215",
     "isNEO": "TRUE",
+    "isPHA": "TRUE",
     "texture": "2k_haumea_fictional.jpg",
     "rotation period (hours)": 24,
     "rotation direction": "prograde"
@@ -397,6 +421,7 @@
     "orbital period (years)": 0.728265562,
     "name": "2017 XA1",
     "isNEO": "TRUE",
+    "isPHA": "TRUE",
     "texture": "2k_haumea_fictional.jpg",
     "rotation period (hours)": 24,
     "rotation direction": "prograde"
@@ -413,6 +438,7 @@
     "orbital period (years)": 0.564713406,
     "name": "2018 JB3",
     "isNEO": "TRUE",
+    "isPHA": "FALSE",
     "texture": "2k_haumea_fictional.jpg",
     "rotation period (hours)": 24,
     "rotation direction": "prograde"
@@ -429,6 +455,7 @@
     "orbital period (years)": 0.451619028,
     "name": "2019 AQ3",
     "isNEO": "TRUE",
+    "isPHA": "FALSE",
     "texture": "2k_haumea_fictional.jpg",
     "rotation period (hours)": 24,
     "rotation direction": "prograde"
@@ -445,6 +472,7 @@
     "orbital period (years)": 0.413895878,
     "name": "2019 LF6",
     "isNEO": "TRUE",
+    "isPHA": "FALSE",
     "texture": "2k_haumea_fictional.jpg",
     "rotation period (hours)": 24,
     "rotation direction": "prograde"
@@ -461,6 +489,7 @@
     "orbital period (years)": 0.742158953,
     "name": "2020 HA10",
     "isNEO": "TRUE",
+    "isPHA": "FALSE",
     "texture": "2k_haumea_fictional.jpg",
     "rotation period (hours)": 24,
     "rotation direction": "prograde"
@@ -477,6 +506,7 @@
     "orbital period (years)": 0.509152567,
     "name": "2020 OV1",
     "isNEO": "TRUE",
+    "isPHA": "FALSE",
     "texture": "2k_haumea_fictional.jpg",
     "rotation period (hours)": 24,
     "rotation direction": "prograde"
@@ -493,6 +523,7 @@
     "orbital period (years)": 0.462919103,
     "name": "2021 BS1",
     "isNEO": "TRUE",
+    "isPHA": "FALSE",
     "texture": "2k_haumea_fictional.jpg",
     "rotation period (hours)": 24,
     "rotation direction": "prograde"
@@ -509,6 +540,7 @@
     "orbital period (years)": 0.56623907,
     "name": "2021 LJ4",
     "isNEO": "TRUE",
+    "isPHA": "FALSE",
     "texture": "2k_haumea_fictional.jpg",
     "rotation period (hours)": 24,
     "rotation direction": "prograde"
@@ -525,6 +557,7 @@
     "orbital period (years)": 0.607703488,
     "name": "2021 PB2",
     "isNEO": "TRUE",
+    "isPHA": "FALSE",
     "texture": "2k_haumea_fictional.jpg",
     "rotation period (hours)": 24,
     "rotation direction": "prograde"
@@ -541,6 +574,7 @@
     "orbital period (years)": 0.31377129,
     "name": "2021 PH27",
     "isNEO": "TRUE",
+    "isPHA": "FALSE",
     "texture": "2k_haumea_fictional.jpg",
     "rotation period (hours)": 24,
     "rotation direction": "prograde"
@@ -557,6 +591,7 @@
     "orbital period (years)": 0.390145248,
     "name": "2021 VR3",
     "isNEO": "TRUE",
+    "isPHA": "FALSE",
     "texture": "2k_haumea_fictional.jpg",
     "rotation period (hours)": 24,
     "rotation direction": "prograde"
@@ -573,6 +608,7 @@
     "orbital period (years)": 0.695940427,
     "name": "2022 BJ8",
     "isNEO": "TRUE",
+    "isPHA": "FALSE",
     "texture": "2k_haumea_fictional.jpg",
     "rotation period (hours)": 24,
     "rotation direction": "prograde"
@@ -589,6 +625,7 @@
     "orbital period (years)": 0.67751479,
     "name": "2023 EL",
     "isNEO": "TRUE",
+    "isPHA": "FALSE",
     "texture": "2k_haumea_fictional.jpg",
     "rotation period (hours)": 24,
     "rotation direction": "prograde"
@@ -605,6 +642,7 @@
     "orbital period (years)": 0.468925784,
     "name": "2023 EY2",
     "isNEO": "TRUE",
+    "isPHA": "FALSE",
     "texture": "2k_haumea_fictional.jpg",
     "rotation period (hours)": 24,
     "rotation direction": "prograde"
@@ -621,6 +659,7 @@
     "orbital period (years)": 0.297493808,
     "name": "2023 KQ5",
     "isNEO": "TRUE",
+    "isPHA": "FALSE",
     "texture": "2k_haumea_fictional.jpg",
     "rotation period (hours)": 24,
     "rotation direction": "prograde"
@@ -637,6 +676,7 @@
     "orbital period (years)": 0.516892981,
     "name": "2023 WK3",
     "isNEO": "TRUE",
+    "isPHA": "TRUE",
     "texture": "2k_haumea_fictional.jpg",
     "rotation period (hours)": 24,
     "rotation direction": "prograde"
