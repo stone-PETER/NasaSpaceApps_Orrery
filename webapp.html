@@ -47,8 +47,11 @@
       #togglePHAButton {
         top: 200px;
       }
-      #toggleDustButton {
+      #toggleCOMETButton {
         top: 240px;
+      }
+      #toggleDustButton {
+        top: 280px;
       }
       .popup {
         display: none;
@@ -74,7 +77,7 @@
       }
       .live-button {
         position: absolute;
-        top: 280px;
+        top: 320px;
         left: 20px;
         z-index: 100;
         padding: 10px 20px;
@@ -112,6 +115,7 @@
     <button id="toggleLabelsButton" class="toggle-button">Hide Labels</button>
     <button id="toggleNEOButton" class="toggle-button">Show NEO</button>
     <button id="togglePHAButton" class="toggle-button">Show PHA</button>
+    <button id="toggleCOMETButton" class="toggle-button">Show COMET</button>
     <button id="toggleDustButton" class="toggle-button">Hide Dust</button>
     <button id="liveButton" class="live-button">Live Positions</button>
 
@@ -162,7 +166,7 @@
       );
       const renderer = new THREE.WebGLRenderer({ antialias: true });
       const textureLoader = new THREE.TextureLoader();
-      const light = new THREE.PointLight(0xffffff, 1.5, 100);
+      const light = new THREE.PointLight(0xffffff, 4, 100, 0.01);
       const sunGeometry = new THREE.SphereGeometry(2, 32, 32);
       const sunMaterial = new THREE.MeshBasicMaterial({ color: 0xffa500 });
       const sun = new THREE.Mesh(sunGeometry, sunMaterial);
@@ -205,6 +209,7 @@
         name,
         isNEO = false,
         isPHA = false,
+        isCOMET = false,
         texture,
         rotationPeriod,
         rotationDirection
@@ -217,27 +222,41 @@
         const planet = new THREE.Mesh(geometry, material);
         planet.isNEO = isNEO;
         planet.isPHA = isPHA;
+        planet.isCOMET = isCOMET;
+
 
         scene.add(planet);
 
         const planetData = {
-          mesh: planet,
-          semiMajorAxis: semiMajorAxis * scaleFactor,
-          eccentricity: eccentricity,
-          inclination: (inclination * Math.PI) / 180,
-          longAscNode: (longAscNode * Math.PI) / 180,
-          argPerigee: (argPerigee * Math.PI) / 180,
-          meanAnomaly: (meanAnomaly * Math.PI) / 180,
-          period: period,
-          name: name,
-          color: color,
-          isNEO: isNEO,
-          isPHA: isPHA,
-          rotationPeriod: rotationPeriod,
-          rotationDirection: rotationDirection,
-          rotationAngle: 0, // Add this to keep track of the current rotation
-          rotationSpeed: 6.48 / rotationPeriod, // Radians per second
-        };
+    mesh: planet,
+    semiMajorAxis: semiMajorAxis * scaleFactor,
+    eccentricity: eccentricity,
+    inclination: (inclination * Math.PI) / 180,
+    longAscNode: (longAscNode * Math.PI) / 180,
+    argPerigee: (argPerigee * Math.PI) / 180,
+    meanAnomaly: (meanAnomaly * Math.PI) / 180,
+    period: period,
+    name: name,
+    color: parseInt(color),
+    isNEO: isNEO,
+    isPHA: isPHA,
+    isCOMET: isCOMET,
+    rotationPeriod: rotationPeriod,
+    rotationDirection: rotationDirection,
+    rotationAngle: 0,
+    rotationSpeed: 6.48 / rotationPeriod,
+  };
+  if (isCOMET) {
+    const cometTailGeometry = new THREE.BufferGeometry();
+    const cometTailMaterial = new THREE.LineBasicMaterial({
+      color: 0xffa500,
+      
+      opacity: .5,
+    });
+    const cometTail = new THREE.Line(cometTailGeometry, cometTailMaterial);
+    scene.add(cometTail);
+    planetData.cometTail = cometTail;
+  }
 
         planets.push(planetData);
         return planetData;
@@ -276,6 +295,7 @@
               element["name"],
               element["isNEO"] === "TRUE",
               element["isPHA"] === "TRUE",
+              element["isCOMET"] === "TRUE",
               element["texture"],
               element["rotation period (hours)"],
               element["rotation direction"]
@@ -408,26 +428,44 @@
         let showNEOs = false;
 
         function updateNEOVisibility() {
-          planets.forEach((planet) => {
-            if (planet.isNEO) {
-              planet.mesh.visible = showNEOs;
-              planet.orbit.visible = showNEOs;
-              labels[planet.name].style.display = showNEOs ? "block" : "none";
-            }
-          });
-        }
+  planets.forEach((planet) => {
+    if (planet.isNEO) {
+      planet.mesh.visible = showNEOs;
+      planet.orbit.visible = showNEOs;
+      labels[planet.name].style.display = showNEOs ? "block" : "none";
+      if (planet.isCOMET && planet.cometTail) {
+        planet.cometTail.visible = showNEOs;
+      }
+    }
+  });
+}
         const togglePHAButton = document.getElementById("togglePHAButton");
         let showPHAs = false;
 
         function updatePHAVisibility() {
-          planets.forEach((planet) => {
-            if (planet.isPHA) {
-              planet.mesh.visible = showPHAs;
-              planet.orbit.visible = showPHAs;
-              labels[planet.name].style.display = showPHAs ? "block" : "none";
-            }
-          });
-        }
+  planets.forEach((planet) => {
+    if (planet.isPHA) {
+      planet.mesh.visible = showPHAs;
+      planet.orbit.visible = showPHAs;
+      labels[planet.name].style.display = showPHAs ? "block" : "none";
+    }
+  });
+}
+const toggleCOMETButton = document.getElementById("toggleCOMETButton");
+        let showCOMETs = false;
+
+      function updateCOMETVisibility() {
+  planets.forEach((planet) => {
+    if (planet.isCOMET) {
+      planet.mesh.visible = showCOMETs;
+      planet.orbit.visible = showCOMETs;
+      labels[planet.name].style.display = showCOMETs ? "block" : "none";
+      if (planet.cometTail) {
+        planet.cometTail.visible = showCOMETs ;
+      }
+    }
+  });
+}
         const liveButton = document.getElementById("liveButton");
         let isLive = false;
 
@@ -520,6 +558,13 @@ togglePHAButton.addEventListener("click", () => {
   updatePHAVisibility();
   togglePHAButton.textContent = showPHAs ? "Hide PHA" : "Show PHA";
 });
+updateCOMETVisibility();
+
+toggleCOMETButton.addEventListener("click", () => {
+  showCOMETs = !showCOMETs;
+  updateCOMETVisibility();
+  toggleCOMETButton.textContent = showCOMETs ? "Hide COMET" : "Show COMET";
+});
 
         const toggleDustButton = document.getElementById("toggleDustButton");
         let dustVisible = true;
@@ -553,7 +598,7 @@ togglePHAButton.addEventListener("click", () => {
               title = "Sun";
               description =
                 "The Sun is the star at the center of the Solar System. It is a nearly perfect sphere of hot plasma, heated to incandescence by nuclear fusion reactions in its core. The Sun radiates this energy mainly as light, ultraviolet, and infrared radiation, and is the most important source of energy for life on Earth.";
-            } else if (object === planets[2].mesh) {
+            } else if (planets[2].name=="Earth") {
               title = "Earth";
               description =
                 "Earth is the third planet from the Sun and the only astronomical object known to harbor life. About 29.2% of Earth's surface is land consisting of continents and islands. The remaining 70.8% is covered with water, mostly by oceans, seas, gulfs, and other salt-water bodies, but also by lakes, rivers, and other fresh water, which together constitute the hydrosphere.";
@@ -583,70 +628,113 @@ togglePHAButton.addEventListener("click", () => {
         closePopup.addEventListener("click", () => {
           document.getElementById("popup").style.display = "none";
         });
+        function updateCometTail(comet, E) {
+  const tailPoints = [];
+  const tailLength = 2*Math.PI/3; // Half orbit
+  const numPoints = 100;
+
+  for (let i = 0; i < numPoints; i++) {
+    const tailE = E - (i / (numPoints - 1)) * tailLength;
+    const x = comet.semiMajorAxis * (Math.cos(tailE) - comet.eccentricity);
+    const y = comet.semiMajorAxis * Math.sqrt(1 - comet.eccentricity * comet.eccentricity) * Math.sin(tailE);
+
+    const cosLAN = Math.cos(comet.longAscNode);
+    const sinLAN = Math.sin(comet.longAscNode);
+    const cosI = Math.cos(comet.inclination);
+    const sinI = Math.sin(comet.inclination);
+    const cosAP = Math.cos(comet.argPerigee);
+    const sinAP = Math.sin(comet.argPerigee);
+
+    const xRot = (cosLAN * cosAP - sinLAN * sinAP * cosI) * x + (-cosLAN * sinAP - sinLAN * cosAP * cosI) * y;
+    const yRot = (sinLAN * cosAP + cosLAN * sinAP * cosI) * x + (-sinLAN * sinAP + cosLAN * cosAP * cosI) * y;
+    const zRot = sinAP * sinI * x + cosAP * sinI * y;
+
+    tailPoints.push(new THREE.Vector3(xRot, zRot, -yRot));
+  }
+
+
+  comet.cometTail.geometry.setFromPoints(tailPoints);
+  
+  // Fade out the tail
+  const colors = new Float32Array(numPoints * 3);
+  for (let i = 0; i < numPoints; i++) {
+    const alpha = 1 - i / (numPoints - 1);
+    colors[i * 3] = alpha;     // R
+    colors[i * 3 + 1] = alpha; // G
+    colors[i * 3 + 2] = alpha; // B
+  }
+  comet.cometTail.geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+  comet.cometTail.material.vertexColors = true;
+}
+
 
         function animate() {
-          requestAnimationFrame(animate);
-          const deltaTime = clock.getDelta();
+  requestAnimationFrame(animate);
+  const deltaTime = clock.getDelta();
 
-          const time = Date.now() * 0.001 * revolutionSpeed;
-          sun.rotation.y += 0.001;
-          sunGlow.rotation.y += 0.001;
-          dustCloud.rotation.y += 0.0001 * revolutionSpeed;
-          if (isLive) {
-            const currentJulianDate = getCurrentJulianDate();
-            updatePlanetPositions(currentJulianDate);
-          } else {
-            planets.forEach((planet) => {
-              if (!planet.isNEO || (planet.isNEO && showNEOs)) {
-                const M =
-                  ((planet.meanAnomaly +
-                    (360 * time) / (planet.period * 365.25)) *
-                    Math.PI) /
-                  180;
-                const E = keplerSolve(planet.eccentricity, M);
+  const time = Date.now() * 0.001 * revolutionSpeed;
+  sun.rotation.y += 0.001;
+  sunGlow.rotation.y += 0.001;
+  dustCloud.rotation.y += 0.0001 * revolutionSpeed;
+  if (isLive) {
+    const currentJulianDate = getCurrentJulianDate();
+    updatePlanetPositions(currentJulianDate);
+  } else {
+    planets.forEach((planet) => {
+      if (!planet.isNEO || (planet.isNEO && showNEOs) || (planet.isPHA && showPHAs)|| (planet.isCOMET && showCOMETs)) {
+        const M =
+          ((planet.meanAnomaly +
+            (360 * time) / (planet.period * 365.25)) *
+            Math.PI) /
+          180;
+        const E = keplerSolve(planet.eccentricity, M);
 
-                const x =
-                  planet.semiMajorAxis * (Math.cos(E) - planet.eccentricity);
-                const y =
-                  planet.semiMajorAxis *
-                  Math.sqrt(1 - planet.eccentricity * planet.eccentricity) *
-                  Math.sin(E);
+        const x =
+          planet.semiMajorAxis * (Math.cos(E) - planet.eccentricity);
+        const y =
+          planet.semiMajorAxis *
+          Math.sqrt(1 - planet.eccentricity * planet.eccentricity) *
+          Math.sin(E);
 
-                const cosLAN = Math.cos(planet.longAscNode);
-                const sinLAN = Math.sin(planet.longAscNode);
-                const cosI = Math.cos(planet.inclination);
-                const sinI = Math.sin(planet.inclination);
-                const cosAP = Math.cos(planet.argPerigee);
-                const sinAP = Math.sin(planet.argPerigee);
+        const cosLAN = Math.cos(planet.longAscNode);
+        const sinLAN = Math.sin(planet.longAscNode);
+        const cosI = Math.cos(planet.inclination);
+        const sinI = Math.sin(planet.inclination);
+        const cosAP = Math.cos(planet.argPerigee);
+        const sinAP = Math.sin(planet.argPerigee);
 
-                const xRot =
-                  (cosLAN * cosAP - sinLAN * sinAP * cosI) * x +
-                  (-cosLAN * sinAP - sinLAN * cosAP * cosI) * y;
-                const yRot =
-                  (sinLAN * cosAP + cosLAN * sinAP * cosI) * x +
-                  (-sinLAN * sinAP + cosLAN * cosAP * cosI) * y;
-                const zRot = sinAP * sinI * x + cosAP * sinI * y;
+        const xRot =
+          (cosLAN * cosAP - sinLAN * sinAP * cosI) * x +
+          (-cosLAN * sinAP - sinLAN * cosAP * cosI) * y;
+        const yRot =
+          (sinLAN * cosAP + cosLAN * sinAP * cosI) * x +
+          (-sinLAN * sinAP + cosLAN * cosAP * cosI) * y;
+        const zRot = sinAP * sinI * x + cosAP * sinI * y;
 
-                planet.mesh.position.set(xRot, zRot, -yRot);
-                // Add rotation
-                const rotationSpeed = 0.648 / planet.rotationPeriod;
-                planet.rotationAngle +=
-                  rotationSpeed *
-                  deltaTime *
-                  (planet.rotationDirection === "retrograde" ? -1 : 1);
-                planet.mesh.rotation.y += rotationSpeed;
+        planet.mesh.position.set(xRot, zRot, -yRot);
+        if (planet.isCOMET && planet.cometTail) {
+          updateCometTail(planet, E);
+        }
 
-                if (planet.mesh.visible) {
-                  const screenPosition = toScreenPosition(
-                    planet.mesh.position,
-                    camera
-                  );
-                  labels[planet.name].style.left = `${screenPosition.x}px`;
-                  labels[planet.name].style.top = `${screenPosition.y - 20}px`;
-                }
-              }
-            });
-          }
+        // Add rotation
+        const rotationSpeed = 0.648 / planet.rotationPeriod;
+        // planet.rotationAngle +=
+        //   rotationSpeed *
+        //   deltaTime *
+        //   (planet.rotationDirection === "retrograde" ? -1 : 1);
+        planet.mesh.rotation.y += rotationSpeed;
+
+        if (planet.mesh.visible) {
+          const screenPosition = toScreenPosition(
+            planet.mesh.position,
+            camera
+          );
+          labels[planet.name].style.left = `${screenPosition.x}px`;
+          labels[planet.name].style.top = `${screenPosition.y - 20}px`;
+        }
+      }
+    });
+  }
 
           controls.update();
           if (planets[2] && planets[2].orbit) {
