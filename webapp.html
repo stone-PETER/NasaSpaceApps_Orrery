@@ -124,6 +124,8 @@
       const planets = [];
       const orbits = [];
       let json = [];
+      let simulationSpeed = 1; // Days per second
+      const timeScale = 365.25;
 
       const clock = new THREE.Clock();
       const dustParticles = new THREE.BufferGeometry();
@@ -227,7 +229,7 @@
           rotationPeriod: rotationPeriod,
           rotationDirection: rotationDirection,
           rotationAngle: 0, // Add this to keep track of the current rotation
-          rotationSpeed: rotationPeriod*0.0015432098765432, // Radians per second
+          rotationSpeed: 6.48 / rotationPeriod, // Radians per second
         };
 
         planets.push(planetData);
@@ -597,7 +599,7 @@
 
                 planet.mesh.position.set(xRot, zRot, -yRot);
                 // Add rotation
-                const rotationSpeed = planet.rotationPeriod * 0.0015432098765432;
+                const rotationSpeed = 0.648 / planet.rotationPeriod;
                 planet.rotationAngle +=
                   rotationSpeed *
                   deltaTime *
