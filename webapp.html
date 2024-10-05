@@ -47,8 +47,11 @@
       #togglePHAButton {
         top: 200px;
       }
-      #toggleDustButton {
+      #toggleCOMETButton {
         top: 240px;
+      }
+      #toggleDustButton {
+        top: 280px;
       }
       .popup {
         display: none;
@@ -74,7 +77,7 @@
       }
       .live-button {
         position: absolute;
-        top: 280px;
+        top: 320px;
         left: 20px;
         z-index: 100;
         padding: 10px 20px;
@@ -112,6 +115,7 @@
     <button id="toggleLabelsButton" class="toggle-button">Hide Labels</button>
     <button id="toggleNEOButton" class="toggle-button">Show NEO</button>
     <button id="togglePHAButton" class="toggle-button">Show PHA</button>
+    <button id="toggleCOMETButton" class="toggle-button">Show COMET</button>
     <button id="toggleDustButton" class="toggle-button">Hide Dust</button>
     <button id="liveButton" class="live-button">Live Positions</button>
 
@@ -205,6 +209,7 @@
         name,
         isNEO = false,
         isPHA = false,
+        isCOMET = false,
         texture,
         rotationPeriod,
         rotationDirection
@@ -217,6 +222,8 @@
         const planet = new THREE.Mesh(geometry, material);
         planet.isNEO = isNEO;
         planet.isPHA = isPHA;
+        planet.isCOMET = isCOMET;
+
 
         scene.add(planet);
 
@@ -233,6 +240,7 @@
           color: color,
           isNEO: isNEO,
           isPHA: isPHA,
+          isCOMET: isCOMET,
           rotationPeriod: rotationPeriod,
           rotationDirection: rotationDirection,
           rotationAngle: 0, // Add this to keep track of the current rotation
@@ -276,6 +284,7 @@
               element["name"],
               element["isNEO"] === "TRUE",
               element["isPHA"] === "TRUE",
+              element["isCOMET"] === "TRUE",
               element["texture"],
               element["rotation period (hours)"],
               element["rotation direction"]
@@ -420,14 +429,27 @@
         let showPHAs = false;
 
         function updatePHAVisibility() {
-          planets.forEach((planet) => {
-            if (planet.isPHA) {
-              planet.mesh.visible = showPHAs;
-              planet.orbit.visible = showPHAs;
-              labels[planet.name].style.display = showPHAs ? "block" : "none";
-            }
-          });
-        }
+  planets.forEach((planet) => {
+    if (planet.isPHA) {
+      planet.mesh.visible = showPHAs;
+      planet.orbit.visible = showPHAs;
+      labels[planet.name].style.display = showPHAs ? "block" : "none";
+    }
+  });
+}
+const toggleCOMETButton = document.getElementById("toggleCOMETButton");
+        let showCOMETs = false;
+
+        function updateCOMETVisibility() {
+  planets.forEach((planet) => {
+    if (planet.isCOMET) {
+      planet.mesh.visible = showCOMETs;
+      planet.orbit.visible = showCOMETs;
+      labels[planet.name].style.display = showCOMETs ? "block" : "none";
+    }
+  });
+}
+
         const liveButton = document.getElementById("liveButton");
         let isLive = false;
 
@@ -520,6 +542,13 @@ togglePHAButton.addEventListener("click", () => {
   updatePHAVisibility();
   togglePHAButton.textContent = showPHAs ? "Hide PHA" : "Show PHA";
 });
+updateCOMETVisibility();
+
+toggleCOMETButton.addEventListener("click", () => {
+  showCOMETs = !showCOMETs;
+  updateCOMETVisibility();
+  toggleCOMETButton.textContent = showCOMETs ? "Hide COMET" : "Show COMET";
+});
 
         const toggleDustButton = document.getElementById("toggleDustButton");
         let dustVisible = true;
@@ -585,68 +614,68 @@ togglePHAButton.addEventListener("click", () => {
         });
 
         function animate() {
-          requestAnimationFrame(animate);
-          const deltaTime = clock.getDelta();
+  requestAnimationFrame(animate);
+  const deltaTime = clock.getDelta();
 
-          const time = Date.now() * 0.001 * revolutionSpeed;
-          sun.rotation.y += 0.001;
-          sunGlow.rotation.y += 0.001;
-          dustCloud.rotation.y += 0.0001 * revolutionSpeed;
-          if (isLive) {
-            const currentJulianDate = getCurrentJulianDate();
-            updatePlanetPositions(currentJulianDate);
-          } else {
-            planets.forEach((planet) => {
-              if (!planet.isNEO || (planet.isNEO && showNEOs)) {
-                const M =
-                  ((planet.meanAnomaly +
-                    (360 * time) / (planet.period * 365.25)) *
-                    Math.PI) /
-                  180;
-                const E = keplerSolve(planet.eccentricity, M);
+  const time = Date.now() * 0.001 * revolutionSpeed;
+  sun.rotation.y += 0.001;
+  sunGlow.rotation.y += 0.001;
+  dustCloud.rotation.y += 0.0001 * revolutionSpeed;
+  if (isLive) {
+    const currentJulianDate = getCurrentJulianDate();
+    updatePlanetPositions(currentJulianDate);
+  } else {
+    planets.forEach((planet) => {
+      if (!planet.isNEO || (planet.isNEO && showNEOs) || (planet.isPHA && showPHAs)|| (planet.isCOMET && showCOMETs)) {
+        const M =
+          ((planet.meanAnomaly +
+            (360 * time) / (planet.period * 365.25)) *
+            Math.PI) /
+          180;
+        const E = keplerSolve(planet.eccentricity, M);
 
-                const x =
-                  planet.semiMajorAxis * (Math.cos(E) - planet.eccentricity);
-                const y =
-                  planet.semiMajorAxis *
-                  Math.sqrt(1 - planet.eccentricity * planet.eccentricity) *
-                  Math.sin(E);
+        const x =
+          planet.semiMajorAxis * (Math.cos(E) - planet.eccentricity);
+        const y =
+          planet.semiMajorAxis *
+          Math.sqrt(1 - planet.eccentricity * planet.eccentricity) *
+          Math.sin(E);
 
-                const cosLAN = Math.cos(planet.longAscNode);
-                const sinLAN = Math.sin(planet.longAscNode);
-                const cosI = Math.cos(planet.inclination);
-                const sinI = Math.sin(planet.inclination);
-                const cosAP = Math.cos(planet.argPerigee);
-                const sinAP = Math.sin(planet.argPerigee);
+        const cosLAN = Math.cos(planet.longAscNode);
+        const sinLAN = Math.sin(planet.longAscNode);
+        const cosI = Math.cos(planet.inclination);
+        const sinI = Math.sin(planet.inclination);
+        const cosAP = Math.cos(planet.argPerigee);
+        const sinAP = Math.sin(planet.argPerigee);
 
-                const xRot =
-                  (cosLAN * cosAP - sinLAN * sinAP * cosI) * x +
-                  (-cosLAN * sinAP - sinLAN * cosAP * cosI) * y;
-                const yRot =
-                  (sinLAN * cosAP + cosLAN * sinAP * cosI) * x +
-                  (-sinLAN * sinAP + cosLAN * cosAP * cosI) * y;
-                const zRot = sinAP * sinI * x + cosAP * sinI * y;
+        const xRot =
+          (cosLAN * cosAP - sinLAN * sinAP * cosI) * x +
+          (-cosLAN * sinAP - sinLAN * cosAP * cosI) * y;
+        const yRot =
+          (sinLAN * cosAP + cosLAN * sinAP * cosI) * x +
+          (-sinLAN * sinAP + cosLAN * cosAP * cosI) * y;
+        const zRot = sinAP * sinI * x + cosAP * sinI * y;
 
-                planet.mesh.position.set(xRot, zRot, -yRot);
-                // Add rotation
-                const rotationSpeed = 0.648 / planet.rotationPeriod;
-                planet.rotationAngle +=
-                  rotationSpeed *
-                  deltaTime *
-                  (planet.rotationDirection === "retrograde" ? -1 : 1);
-                planet.mesh.rotation.y += rotationSpeed;
+        planet.mesh.position.set(xRot, zRot, -yRot);
+        // Add rotation
+        const rotationSpeed = 0.648 / planet.rotationPeriod;
+        // planet.rotationAngle +=
+        //   rotationSpeed *
+        //   deltaTime *
+        //   (planet.rotationDirection === "retrograde" ? -1 : 1);
+        planet.mesh.rotation.y += rotationSpeed;
 
-                if (planet.mesh.visible) {
-                  const screenPosition = toScreenPosition(
-                    planet.mesh.position,
-                    camera
-                  );
-                  labels[planet.name].style.left = `${screenPosition.x}px`;
-                  labels[planet.name].style.top = `${screenPosition.y - 20}px`;
-                }
-              }
-            });
-          }
+        if (planet.mesh.visible) {
+          const screenPosition = toScreenPosition(
+            planet.mesh.position,
+            camera
+          );
+          labels[planet.name].style.left = `${screenPosition.x}px`;
+          labels[planet.name].style.top = `${screenPosition.y - 20}px`;
+        }
+      }
+    });
+  }
 
           controls.update();
           if (planets[2] && planets[2].orbit) {
