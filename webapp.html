@@ -105,11 +105,43 @@
         const positions = new Float32Array(dustCount * 3);
         const colors = new Float32Array(dustCount * 3);
         const dustMaterial = new THREE.PointsMaterial({
-            size: 0.05,
-            vertexColors: true,
-            transparent: true,
-            opacity: 0.8
-        });
+    size: 0.05,
+    vertexColors: true,
+    transparent: true,
+    opacity: 0.8,
+    onBeforeCompile: function (shader) {
+        shader.vertexShader = ()=>{
+                vColor = color;
+
+                // Calculate cube vertices based on position and size
+                 cubeVertices[8] = [](
+                    vec3(-0.5, -0.5, -0.5),
+                    vec3(0.5, -0.5, -0.5),
+                    vec3(0.5, 0.5, -0.5),
+                    vec3(-0.5, 0.5, -0.5),
+                    vec3(-0.5, -0.5, 0.5),
+                    vec3(0.5, -0.5, 0.5),
+                    vec3(0.5, 0.5, 0.5),
+                    vec3(-0.5, 0.5, 0.5)
+                );
+
+                // Interpolate between cube vertices based on alpha
+                 position = mix(cubeVertices[0], cubeVertices[1], alpha);
+                position = mix(position, cubeVertices[2], alpha);
+                position = mix(position, cubeVertices[3], alpha);
+                position = mix(position, cubeVertices[4], alpha);
+                position = mix(position, cubeVertices[5], alpha);
+                position = mix(position, cubeVertices[6], alpha);
+                position = mix(position, cubeVertices[7], alpha);
+
+                // Transform position and set size
+                 mvPosition = modelViewMatrix * vec4(position, 1.0);
+                gl_PointSize = size * ( -mvPosition.z );
+                gl_Position = projectionMatrix * mvPosition;
+            }
+        ;
+    }
+});
 
         const dustCloud = new THREE.Points(dustParticles, dustMaterial);
         
