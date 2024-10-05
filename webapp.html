@@ -120,22 +120,24 @@
     <script src="https://cdn.jsdelivr.net/npm/three@latest/build/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@latest/examples/js/controls/OrbitControls.js"></script>
     <script>
-        const labels = {};
-        const planets = [];
-        const orbits = [];
-        let json = [];
-        
-        const clock = new THREE.Clock();
-        const dustParticles = new THREE.BufferGeometry();
-        const dustCount = 10000;
-        const positions = new Float32Array(dustCount * 3);
-        const colors = new Float32Array(dustCount * 3);
-        const dustMaterial = new THREE.PointsMaterial({
-            size: 0.05,
-            vertexColors: true,
-            transparent: true,
-            opacity: 0.8
-        });
+      const labels = {};
+      const planets = [];
+      const orbits = [];
+      let json = [];
+      let simulationSpeed = 1; // Days per second
+      const timeScale = 365.25;
+
+      const clock = new THREE.Clock();
+      const dustParticles = new THREE.BufferGeometry();
+      const dustCount = 10000;
+      const positions = new Float32Array(dustCount * 3);
+      const colors = new Float32Array(dustCount * 3);
+      const dustMaterial = new THREE.PointsMaterial({
+        size: 0.05,
+        vertexColors: true,
+        transparent: true,
+        opacity: 0.8,
+      });
 
       const dustCloud = new THREE.Points(dustParticles, dustMaterial);
 
@@ -227,7 +229,7 @@
           rotationPeriod: rotationPeriod,
           rotationDirection: rotationDirection,
           rotationAngle: 0, // Add this to keep track of the current rotation
-          rotationSpeed: rotationPeriod*0.0015432098765432, // Radians per second
+          rotationSpeed: 6.48 / rotationPeriod, // Radians per second
         };
 
         planets.push(planetData);
@@ -597,7 +599,7 @@
 
                 planet.mesh.position.set(xRot, zRot, -yRot);
                 // Add rotation
-                const rotationSpeed = planet.rotationPeriod * 0.0015432098765432;
+                const rotationSpeed = 0.648 / planet.rotationPeriod;
                 planet.rotationAngle +=
                   rotationSpeed *
                   deltaTime *
