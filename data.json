@@ -723,7 +723,7 @@
   },
   {
     "size": 0.1,
-    "color": "0xffffff",
+    "color":  "rgba(255, 255, 255, 0)",
     "semi-major axis (AU)": 2.219588160856368,
     "eccentricity": 0.8483810535820915,
     "inclination (deg)": 11.48492503135146,
@@ -741,7 +741,7 @@
   },
   {
     "size": 0.1,
-    "color": "0xffffff",
+    "color":  "rgba(255, 255, 255, 0)",
     "semi-major axis (AU)": 2.677573002117349,
     "eccentricity": 0.6482479664610991,
     "inclination (deg)": 10.97729838917803,
@@ -759,7 +759,7 @@
   },
   {
     "size": 0.1,
-    "color": "0xffffff",
+    "color":  "rgba(255, 255, 255, 0)",
     "semi-major axis (AU)": 2.644728872743298,
     "eccentricity": 0.6413970858112291,
     "inclination (deg)": 10.90021895330842,
@@ -777,7 +777,7 @@
 },
 {
   "size": 0.1,
-  "color": "0xffffff",
+  "color":  "rgba(255, 255, 255, 0)",
   "semi-major axis (AU)": 1.90707598598611,
   "eccentricity": 0.902090810293565,
   "inclination (deg)": 18.1743253370403,
@@ -795,7 +795,7 @@
 },
 {
   "size": 0.1,
-  "color": "0xffffff",
+  "color": "rgba(255, 255, 255, 0)",
   "semi-major axis (AU)": 1.305450410793916,
   "eccentricity": 0.9394205210769577,
   "inclination (deg)": 156.2941869123366,
@@ -813,7 +813,7 @@
 },
 {
   "size": 0.1,
-  "color": "0xffffff",
+  "color": "rgba(255, 255, 255, 0)",
   "semi-major axis (AU)": 2.228328478643237,
   "eccentricity": 0.697834788456784,
   "inclination (deg)": 16.72709135721861,
