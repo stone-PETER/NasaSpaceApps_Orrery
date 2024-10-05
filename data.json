@@ -47,7 +47,9 @@
     "name": "Earth",
     "isNEO": "FALSE",
     "isPHA": "FALSE",
-    "texture": "2k_earth_daymap.jpg",
+    "texture": "/textures/earth/00_earthmap1k.jpg",
+    "specularMap": "./textures/earth/00_earthspec1k.jpg",
+    "bumpMap": "./textures/earth/00_earthbump1k.jpg",
     "rotation period (hours)": 24,
     "rotation direction": "prograde"
 

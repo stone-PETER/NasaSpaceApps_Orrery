@@ -136,6 +136,7 @@
       const dustCount = 10000;
       const positions = new Float32Array(dustCount * 3);
       const colors = new Float32Array(dustCount * 3);
+      const sunLight = new THREE.DirectionalLight(0xffffff, 0);
       const dustMaterial = new THREE.PointsMaterial({
         size: 0.05,
         vertexColors: true,
@@ -162,7 +163,7 @@
       );
       const renderer = new THREE.WebGLRenderer({ antialias: true });
       const textureLoader = new THREE.TextureLoader();
-      const light = new THREE.PointLight(0xffffff, 1.5, 100);
+      const light = new THREE.PointLight(0xffffff, 4, 100, 0.01);
       const sunGeometry = new THREE.SphereGeometry(2, 32, 32);
       const sunMaterial = new THREE.MeshBasicMaterial({ color: 0xffa500 });
       const sun = new THREE.Mesh(sunGeometry, sunMaterial);
@@ -193,55 +194,87 @@
       );
 
       function createPlanet(
-        size,
-        color,
-        semiMajorAxis,
-        eccentricity,
-        inclination,
-        longAscNode,
-        argPerigee,
-        meanAnomaly,
-        period,
-        name,
-        isNEO = false,
-        isPHA = false,
-        texture,
-        rotationPeriod,
-        rotationDirection
-      ) {
-        const planetTexture = textureLoader.load(texture);
-        const material = new THREE.MeshBasicMaterial({ map: planetTexture });
+    size,
+    color,
+    semiMajorAxis,
+    eccentricity,
+    inclination,
+    longAscNode,
+    argPerigee,
+    meanAnomaly,
+    period,
+    name,
+    isNEO = false,
+    isPHA = false,
+    texture,
+    rotationPeriod,
+    rotationDirection,
+    normalMap,
+    specularMap,
+    bumpMap,
+    displacementMap,
+    emissiveMap
+) {
+    
+    const normalMapTexture = textureLoader.load(normalMap || null);
+    const specularMapTexture = textureLoader.load(specularMap || null);
+    const bumpMapTexture = textureLoader.load(bumpMap || null);
+    const displacementMapTexture = textureLoader.load(displacementMap || null);
+    const emissiveMapTexture = textureLoader.load(emissiveMap || null);
 
-        const geometry = new THREE.SphereGeometry(size, 32, 32);
+    // const material = new THREE.MeshBasicMaterial({
+    //     map: planetTexture,
+    //     // normalMap: normalMapTexture,
+    //     specularMap: specularMapTexture,
+    //     bumpMap: bumpMapTexture,
+    //     // displacementMap: displacementMapTexture,
+    //     // emissiveMap: emissiveMapTexture,
+    //     // roughness: 0.2,
+    //     // metalness: 0.8,
+    // });
 
-        const planet = new THREE.Mesh(geometry, material);
-        planet.isNEO = isNEO;
-        planet.isPHA = isPHA;
+    sunLight.position.set(0, 0, 0);
+    scene.add(sunLight);
 
-        scene.add(planet);
 
-        const planetData = {
-          mesh: planet,
-          semiMajorAxis: semiMajorAxis * scaleFactor,
-          eccentricity: eccentricity,
-          inclination: (inclination * Math.PI) / 180,
-          longAscNode: (longAscNode * Math.PI) / 180,
-          argPerigee: (argPerigee * Math.PI) / 180,
-          meanAnomaly: (meanAnomaly * Math.PI) / 180,
-          period: period,
-          name: name,
-          color: color,
-          isNEO: isNEO,
-          isPHA: isPHA,
-          rotationPeriod: rotationPeriod,
-          rotationDirection: rotationDirection,
-          rotationAngle: 0, // Add this to keep track of the current rotation
-          rotationSpeed: 6.48 / rotationPeriod, // Radians per second
-        };
 
-        planets.push(planetData);
-        return planetData;
-      }
+    const material = new THREE.MeshPhongMaterial({
+        map: textureLoader.load(texture),
+        specularMap: textureLoader.load(specularMap),
+        bumpMap: textureLoader.load(bumpMap),
+        bumpScale: 0.04,
+        });
+
+    const geometry = new THREE.SphereGeometry(size, 32, 32);
+
+    const planet = new THREE.Mesh(geometry, material);
+    planet.isNEO = isNEO;
+    planet.isPHA = isPHA;
+
+    scene.add(planet);
+
+    const planetData = {
+        mesh: planet,
+        semiMajorAxis: semiMajorAxis * scaleFactor,
+        eccentricity: eccentricity,
+        inclination: (inclination * Math.PI) / 180,
+        longAscNode: (longAscNode * Math.PI) / 180,
+        argPerigee: (argPerigee * Math.PI) / 180,
+        meanAnomaly: (meanAnomaly * Math.PI) / 180,
+        period: period,
+        name: name,
+        color: parseInt(color),
+        isNEO: isNEO,
+        isPHA: isPHA,
+        rotationPeriod: rotationPeriod,
+        rotationDirection: rotationDirection,
+        rotationAngle: 0, // Add this to keep track of the current rotation
+        rotationSpeed: 6.48 / rotationPeriod, // Radians per second
+    };
+
+    planets.push(planetData);
+    return planetData;
+}
       function keplerSolve(e, M) {
         let E = M;
         for (let i = 0; i < 10; i++) {
@@ -584,6 +617,9 @@ togglePHAButton.addEventListener("click", () => {
           document.getElementById("popup").style.display = "none";
         });
 
+        let angle = 0;
+
+
         function animate() {
           requestAnimationFrame(animate);
           const deltaTime = clock.getDelta();
@@ -673,6 +709,11 @@ togglePHAButton.addEventListener("click", () => {
               }
             };
           }
+
+        // angle += 0.01; // Change this value for faster or slower rotation
+        sunLight.position.x = 2 * Math.cos(angle); // Radius of the rotation
+        sunLight.position.z = 2 * Math.sin(angle);
+
 
           renderer.render(scene, camera);
         }
