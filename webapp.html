@@ -155,7 +155,6 @@
 
         function createPlanet(size, color, semiMajorAxis, eccentricity, inclination, longAscNode, argPerigee, meanAnomaly, period, name, isNEO=false,texture, rotationPeriod, rotationDirection) {
             const planetTexture = textureLoader.load(texture);
-            planetTexture.wrapS = THREE.RepeatWrapping;
             const material = new THREE.MeshBasicMaterial({ map: planetTexture });
 
             const geometry = new THREE.SphereGeometry(size, 32, 32);
