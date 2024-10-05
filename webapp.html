@@ -55,6 +55,25 @@
             right: 10px;
             cursor: pointer;
         }
+        .live-button {
+            position: absolute;
+            top: 240px;
+            left: 20px;
+            z-index: 100;
+            padding: 10px 20px;
+            background-color: #ff4500;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+        .live-button:hover {
+            background-color: #ff6347;
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2);
+        }
     </style>
 </head>
 <body>
@@ -64,6 +83,7 @@
     <button id="toggleLabelsButton" class="toggle-button">Hide Labels</button>
     <button id="toggleNEOButton" class="toggle-button">Show NEO</button>
     <button id="toggleDustButton" class="toggle-button">Hide Dust</button>
+    <button id="liveButton" class="live-button">Live Positions</button>
 
     <div id="popup" class="popup">
         <span class="popup-close">&times;</span>
@@ -78,7 +98,8 @@
         const planets = [];
         const orbits = [];
         let json = [];
-
+        
+        const clock = new THREE.Clock();
         const dustParticles = new THREE.BufferGeometry();
         const dustCount = 10000;
         const positions = new Float32Array(dustCount * 3);
@@ -132,7 +153,7 @@
             }
         );
 
-        function createPlanet(size, color, semiMajorAxis, eccentricity, inclination, longAscNode, argPerigee, meanAnomaly, period, name, isNEO=false,texture) {
+        function createPlanet(size, color, semiMajorAxis, eccentricity, inclination, longAscNode, argPerigee, meanAnomaly, period, name, isNEO=false,texture, rotationPeriod, rotationDirection) {
             const planetTexture = textureLoader.load(texture);
             const material = new THREE.MeshBasicMaterial({ map: planetTexture });
 
@@ -154,7 +175,12 @@
                 period: period,
                 name: name, 
                 color: color,
-                isNEO: isNEO
+                isNEO: isNEO,
+                rotationPeriod: rotationPeriod,
+                rotationDirection: rotationDirection,
+                 rotationAngle: 0,// Add this to keep track of the current rotation
+                 rotationSpeed: (2 * Math.PI / (rotationPeriod * 3600)) // Radians per second
+
             };
 
             planets.push(planetData);
@@ -190,7 +216,11 @@
                 element["argument of perihelion (deg)"], 
                 element["mean anomaly (deg)"], 
                 element["orbital period (years)"], 
-                element["name"],element["isNEO"] === 'TRUE',element["texture"]
+                element["name"],element["isNEO"] === 'TRUE',
+                element["texture"],
+                element["rotation period (hours)"],
+                element["rotation direction"]
+
             );
         });
     } catch (error) {
@@ -302,6 +332,66 @@
                     }
                 });
             }
+            const liveButton = document.getElementById('liveButton');
+            let isLive = false;
+
+            function getCurrentJulianDate() {
+                const now = new Date();
+                const julianDate = (now.getTime() / 86400000) + 2440587.5;
+                return julianDate;
+            }
+            function getOrbitalElements(planet, julianDate) {
+                // This is a simplified calculation and might not be 100% accurate
+                const t = (julianDate - 2451545.0) / 36525; // Julian centuries since J2000.0
+                const meanLongitude = (planet.meanAnomaly + planet.argPerigee + planet.longAscNode + 180 * t / planet.period) % 360;
+                const M = (meanLongitude - planet.argPerigee - planet.longAscNode) % 360;
+                return {
+                    M: M * Math.PI / 180,
+                    e: planet.eccentricity,
+                    a: planet.semiMajorAxis,
+                    i: planet.inclination,
+                    omega: planet.longAscNode,
+                    w: planet.argPerigee
+                };
+            }
+
+            function updatePlanetPositions(julianDate) {
+                planets.forEach(planet => {
+                    if (!planet.isNEO || (planet.isNEO && showNEOs)) {
+                        const elements = getOrbitalElements(planet, julianDate);
+                        const E = keplerSolve(elements.e, elements.M);
+                        
+                        const x = elements.a * (Math.cos(E) - elements.e);
+                        const y = elements.a * Math.sqrt(1 - elements.e * elements.e) * Math.sin(E);
+
+                        const cosLAN = Math.cos(elements.omega);
+                        const sinLAN = Math.sin(elements.omega);
+                        const cosI = Math.cos(elements.i);
+                        const sinI = Math.sin(elements.i);
+                        const cosAP = Math.cos(elements.w);
+                        const sinAP = Math.sin(elements.w);
+
+                        const xRot = (cosLAN * cosAP - sinLAN * sinAP * cosI) * x + (-cosLAN * sinAP - sinLAN * cosAP * cosI) * y;
+                        const yRot = (sinLAN * cosAP + cosLAN * sinAP * cosI) * x + (-sinLAN * sinAP + cosLAN * cosAP * cosI) * y;
+                        const zRot = (sinAP * sinI) * x + (cosAP * sinI) * y;
+
+                        planet.mesh.position.set(xRot, zRot, -yRot);
+
+                        if (planet.mesh.visible) {
+                            const screenPosition = toScreenPosition(planet.mesh.position, camera);
+                            labels[planet.name].style.left = `${screenPosition.x}px`;
+                            labels[planet.name].style.top = `${screenPosition.y - 20}px`;
+                        }
+                    }
+                });
+            }
+
+            liveButton.addEventListener('click', () => {
+                isLive = !isLive;
+                liveButton.textContent = isLive ? 'Stop Live' : 'Live Positions';
+                liveButton.style.backgroundColor = isLive ? '#32cd32' : '#ff4500';
+            });
+
     
             updateNEOVisibility();
     
@@ -366,11 +456,17 @@
     
             function animate() {
                 requestAnimationFrame(animate);
+                const deltaTime = clock.getDelta();
     
                 const time = Date.now() * 0.001 * revolutionSpeed;
                 sun.rotation.y += 0.001;
                 sunGlow.rotation.y += 0.001;
                 dustCloud.rotation.y += 0.0001 * revolutionSpeed;
+                if (isLive) {
+                    const currentJulianDate = getCurrentJulianDate();
+                    updatePlanetPositions(currentJulianDate);
+                } else {
+
                 planets.forEach(planet => {
                     if (!planet.isNEO || (planet.isNEO && showNEOs)) {
                         const M = (planet.meanAnomaly + (360 * time / (planet.period * 365.25))) * Math.PI / 180;
@@ -391,6 +487,13 @@
                         const zRot = (sinAP * sinI) * x + (cosAP * sinI) * y;
     
                         planet.mesh.position.set(xRot, zRot, -yRot);
+                         // Add rotation
+                         const rotationSpeed = (2 * Math.PI / (planet.rotationPeriod * 3600)) * revolutionSpeed;
+                        planet.rotationAngle += rotationSpeed * deltaTime * (planet.rotationDirection === "retrograde" ? -1 : 1);
+                        planet.mesh.rotation.y = planet.rotationAngle;
+                         // Debugging: Log rotation information
+                        console.log(`${planet.name} - Rotation Angle: ${planet.rotationAngle.toFixed(4)}, Rotation Speed: ${planet.rotationSpeed.toFixed(6)}, Delta Time: ${deltaTime.toFixed(4)}`);
+
     
                         if (planet.mesh.visible) {
                             const screenPosition = toScreenPosition(planet.mesh.position, camera);
@@ -399,6 +502,7 @@
                         }
                     }
                 });
+                }
     
                 controls.update();
                 if (planets[2] && planets[2].orbit) {
@@ -425,6 +529,15 @@
           
                 renderer.render(scene, camera);
             }
+            function testRotation() {
+    planets.forEach(planet => {
+        planet.mesh.rotation.y += Math.PI / 4; // Rotate by 45 degrees
+        console.log(`${planet.name} rotated to ${planet.mesh.rotation.y}`);
+    });
+}
+
+
+
     
             function toScreenPosition(position, camera) {
                 const vector = position.clone();
