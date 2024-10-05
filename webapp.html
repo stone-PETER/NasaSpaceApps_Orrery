@@ -44,8 +44,11 @@
       #toggleNEOButton {
         top: 160px;
       }
-      #toggleDustButton {
+      #togglePHAButton {
         top: 200px;
+      }
+      #toggleDustButton {
+        top: 240px;
       }
       .popup {
         display: none;
@@ -71,7 +74,7 @@
       }
       .live-button {
         position: absolute;
-        top: 240px;
+        top: 280px;
         left: 20px;
         z-index: 100;
         padding: 10px 20px;
@@ -108,6 +111,7 @@
     <button id="toggleOrbitsButton" class="toggle-button">Hide Orbits</button>
     <button id="toggleLabelsButton" class="toggle-button">Hide Labels</button>
     <button id="toggleNEOButton" class="toggle-button">Show NEO</button>
+    <button id="togglePHAButton" class="toggle-button">Show PHA</button>
     <button id="toggleDustButton" class="toggle-button">Hide Dust</button>
     <button id="liveButton" class="live-button">Live Positions</button>
 
@@ -200,6 +204,7 @@
         period,
         name,
         isNEO = false,
+        isPHA = false,
         texture,
         rotationPeriod,
         rotationDirection
@@ -211,6 +216,7 @@
 
         const planet = new THREE.Mesh(geometry, material);
         planet.isNEO = isNEO;
+        planet.isPHA = isPHA;
 
         scene.add(planet);
 
@@ -226,6 +232,7 @@
           name: name,
           color: color,
           isNEO: isNEO,
+          isPHA: isPHA,
           rotationPeriod: rotationPeriod,
           rotationDirection: rotationDirection,
           rotationAngle: 0, // Add this to keep track of the current rotation
@@ -268,6 +275,7 @@
               element["orbital period (years)"],
               element["name"],
               element["isNEO"] === "TRUE",
+              element["isPHA"] === "TRUE",
               element["texture"],
               element["rotation period (hours)"],
               element["rotation direction"]
@@ -408,6 +416,18 @@
             }
           });
         }
+        const togglePHAButton = document.getElementById("togglePHAButton");
+        let showPHAs = false;
+
+        function updatePHAVisibility() {
+          planets.forEach((planet) => {
+            if (planet.isPHA) {
+              planet.mesh.visible = showPHAs;
+              planet.orbit.visible = showPHAs;
+              labels[planet.name].style.display = showPHAs ? "block" : "none";
+            }
+          });
+        }
         const liveButton = document.getElementById("liveButton");
         let isLive = false;
 
@@ -491,6 +511,16 @@
           updateNEOVisibility();
           toggleNEOButton.textContent = showNEOs ? "Hide NEO" : "Show NEO";
         });
+
+
+        updatePHAVisibility();
+
+togglePHAButton.addEventListener("click", () => {
+  showPHAs = !showPHAs;
+  updatePHAVisibility();
+  togglePHAButton.textContent = showPHAs ? "Hide PHA" : "Show PHA";
+});
+
         const toggleDustButton = document.getElementById("toggleDustButton");
         let dustVisible = true;
         toggleDustButton.addEventListener("click", () => {
