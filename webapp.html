@@ -55,6 +55,562 @@
             right: 10px;
             cursor: pointer;
         }
+        .live-button {
+            position: absolute;
+            top: 240px;
+            left: 20px;
+            z-index: 100;
+            padding: 10px 20px;
+            background-color: #ff4500;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+        .live-button:hover {
+            background-color: #ff6347;
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <input type="range" id="speedSlider" class="slider" min="0" max="10" step="0.1" value="1" />
+    <label for="speedSlider" style="position: absolute; top: 50px; left: 20px; color: white;">Revolution Speed</label>
+    <button id="toggleOrbitsButton" class="toggle-button">Hide Orbits</button>
+    <button id="toggleLabelsButton" class="toggle-button">Hide Labels</button>
+    <button id="toggleNEOButton" class="toggle-button">Show NEO</button>
+    <button id="toggleDustButton" class="toggle-button">Hide Dust</button>
+    <button id="liveButton" class="live-button">Live Positions</button>
+
+    <div id="popup" class="popup">
+        <span class="popup-close">&times;</span>
+        <h2 id="popup-title"></h2>
+        <p id="popup-description"></p>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/three@latest/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@latest/examples/js/controls/OrbitControls.js"></script>
+    <script>
+        const labels = {};
+        const planets = [];
+        const orbits = [];
+        let json = [];
+        
+        const clock = new THREE.Clock();
+        const dustParticles = new THREE.BufferGeometry();
+        const dustCount = 10000;
+        const positions = new Float32Array(dustCount * 3);
+        const colors = new Float32Array(dustCount * 3);
+        const dustMaterial = new THREE.PointsMaterial({
+            size: 0.05,
+            vertexColors: true,
+            transparent: true,
+            opacity: 0.8
+        });
+
+        const dustCloud = new THREE.Points(dustParticles, dustMaterial);
+        
+        const scaleFactor = 10;
+        const sunGlowGeometry = new THREE.SphereGeometry(2.1, 32, 32);
+        const sunGlowMaterial = new THREE.MeshBasicMaterial({ 
+            color: 0xffff00, 
+            transparent: true, 
+            opacity: 0.3 
+        });
+        const sunGlow = new THREE.Mesh(sunGlowGeometry, sunGlowMaterial);
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        const textureLoader = new THREE.TextureLoader();
+        const light = new THREE.PointLight(0xffffff, 1.5, 100);
+        const sunGeometry = new THREE.SphereGeometry(2, 32, 32);
+        const sunMaterial = new THREE.MeshBasicMaterial({ color: 0xFFA500 });
+        const sun = new THREE.Mesh(sunGeometry, sunMaterial);
+        
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        light.position.set(0, 0, 0);
+        scene.add(light);
+
+
+        scene.add(sun);
+
+        scene.add(sunGlow);
+
+        textureLoader.load(
+            '2k_sun.jpg',
+            function (texture) {
+                sunMaterial.map = texture;
+                sunMaterial.needsUpdate = true;
+            },
+            undefined,
+            function (err) {
+                console.error('An error occurred while loading the sun texture:', err);
+            }
+        );
+
+        function createPlanet(size, color, semiMajorAxis, eccentricity, inclination, longAscNode, argPerigee, meanAnomaly, period, name, isNEO=false,texture, rotationPeriod, rotationDirection) {
+            const planetTexture = textureLoader.load(texture);
+            const material = new THREE.MeshBasicMaterial({ map: planetTexture });
+
+            const geometry = new THREE.SphereGeometry(size, 32, 32);
+            
+            const planet = new THREE.Mesh(geometry, material);
+            planet.isNEO = isNEO;
+            
+            scene.add(planet);
+
+            const planetData = { 
+                mesh: planet, 
+                semiMajorAxis: semiMajorAxis * scaleFactor, 
+                eccentricity: eccentricity, 
+                inclination: inclination * Math.PI / 180,
+                longAscNode: longAscNode * Math.PI / 180,
+                argPerigee: argPerigee * Math.PI / 180,
+                meanAnomaly: meanAnomaly * Math.PI / 180,
+                period: period,
+                name: name, 
+                color: color,
+                isNEO: isNEO,
+                rotationPeriod: rotationPeriod,
+                rotationDirection: rotationDirection,
+                 rotationAngle: 0,// Add this to keep track of the current rotation
+                 rotationSpeed: (2 * Math.PI / (rotationPeriod * 3600)) // Radians per second
+
+            };
+
+            planets.push(planetData);
+            return planetData;
+        }
+        function keplerSolve(e, M) {
+            let E = M;
+            for (let i = 0; i < 10; i++) {
+                E = M + e * Math.sin(E);
+            }
+            return E;
+        }
+        function createLabel(planet) {
+            const label = document.createElement('div');
+            label.className = 'label';
+            label.textContent = planet.name;
+            label.style.display = planet.isNEO ? 'none' : 'block';
+            document.body.appendChild(label);
+            labels[planet.name] = label;
+        }
+
+        const getData = async () => {
+        try {
+        const response = await fetch('./data.json');
+        json = await response.json();
+        json.forEach(element => {
+            createPlanet(
+                element["size"], `${element["color"]}`, 
+                element["semi-major axis (AU)"], 
+                element["eccentricity"], 
+                element["inclination (deg)"], 
+                element["longitude of ascending node (deg)"], 
+                element["argument of perihelion (deg)"], 
+                element["mean anomaly (deg)"], 
+                element["orbital period (years)"], 
+                element["name"],element["isNEO"] === 'TRUE',
+                element["texture"],
+                element["rotation period (hours)"],
+                element["rotation direction"]
+
+            );
+        });
+    } catch (error) {
+        console.error('Error fetching data:', error);
+    }
+    };
+
+    
+
+    const executeAfterData = async()=>{
+        await getData();
+        // Run only after getdata is completed
+        planets.forEach(planet => createLabel(planet));
+        planets.forEach(planet => {
+            const orbitPoints = [];
+            for (let i = 0; i <= 360; i++) {
+                const angle = i * Math.PI / 180;
+                const E = keplerSolve(planet.eccentricity, angle);
+                const x = planet.semiMajorAxis * (Math.cos(E) - planet.eccentricity);
+                const y = planet.semiMajorAxis * Math.sqrt(1 - planet.eccentricity * planet.eccentricity) * Math.sin(E);
+    
+                const cosLAN = Math.cos(planet.longAscNode);
+                const sinLAN = Math.sin(planet.longAscNode);
+                const cosI = Math.cos(planet.inclination);
+                const sinI = Math.sin(planet.inclination);
+                const cosAP = Math.cos(planet.argPerigee);
+                const sinAP = Math.sin(planet.argPerigee);
+    
+                const xRot = (cosLAN * cosAP - sinLAN * sinAP * cosI) * x + (-cosLAN * sinAP - sinLAN * cosAP * cosI) * y;
+                const yRot = (sinLAN * cosAP + cosLAN * sinAP * cosI) * x + (-sinLAN * sinAP + cosLAN * cosAP * cosI) * y;
+                const zRot = (sinAP * sinI) * x + (cosAP * sinI) * y;
+    
+                orbitPoints.push(new THREE.Vector3(xRot, zRot, -yRot));
+            }
+    
+            const geometry = new THREE.BufferGeometry().setFromPoints(orbitPoints);
+            const material = new THREE.LineBasicMaterial({ color: planet.color, opacity: 0.5, transparent: true });
+            const orbit = new THREE.Line(geometry, material);
+            orbit.visible = !planet.isNEO;
+            scene.add(orbit);
+            orbits.push(orbit);
+            planet.orbit = orbit;
+        });
+            
+        for (let i = 0; i < dustCount * 3; i += 3) {
+            // Random position within a sphere
+            const radius = 50 * Math.cbrt(Math.random()); // Use cube root for uniform distribution
+            const theta = Math.random() * Math.PI * 2;
+            const phi = Math.acos(2 * Math.random() - 1);
+            
+            positions[i] = radius * Math.sin(phi) * Math.cos(theta);
+            positions[i + 1] = radius * Math.sin(phi) * Math.sin(theta);
+            positions[i + 2] = radius * Math.cos(phi);
+    
+            // Blue color with slight variation
+            colors[i] = 0.5 + Math.random() * 0.2;     // R
+            colors[i + 1] = 0.7 + Math.random() * 0.3; // G
+            colors[i + 2] = 0.9 + Math.random() * 0.1; // B
+        }
+    
+            dustParticles.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            dustParticles.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+    
+            scene.add(dustCloud);
+    
+            const controls = new THREE.OrbitControls(camera, renderer.domElement);
+            camera.position.set(0, 50, 100);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.25;
+            controls.update();
+    
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+    
+            const speedSlider = document.getElementById('speedSlider');
+            let revolutionSpeed = parseFloat(speedSlider.value);
+            speedSlider.addEventListener('input', () => {
+                revolutionSpeed = parseFloat(speedSlider.value);
+            });
+    
+            const toggleOrbitsButton = document.getElementById('toggleOrbitsButton');
+            let orbitsVisible = true;
+            toggleOrbitsButton.addEventListener('click', () => {
+                orbitsVisible = !orbitsVisible;
+                orbits.forEach(orbit => orbit.visible = orbitsVisible);
+                toggleOrbitsButton.textContent = orbitsVisible ? 'Hide Orbits' : 'Show Orbits';
+            });
+    
+            const toggleLabelsButton = document.getElementById('toggleLabelsButton');
+            let labelsVisible = true;
+            toggleLabelsButton.addEventListener('click', () => {
+                labelsVisible = !labelsVisible;
+                Object.values(labels).forEach(label => label.style.display = labelsVisible ? 'block' : 'none');
+                toggleLabelsButton.textContent = labelsVisible ? 'Hide Labels' : 'Show Labels';
+            });
+    
+            const toggleNEOButton = document.getElementById('toggleNEOButton');
+            let showNEOs = false;
+    
+            function updateNEOVisibility() {
+                planets.forEach(planet => {
+                    if (planet.isNEO) {
+                        planet.mesh.visible = showNEOs;
+                        planet.orbit.visible = showNEOs;
+                        labels[planet.name].style.display = showNEOs ? 'block' : 'none';
+                    }
+                });
+            }
+            const liveButton = document.getElementById('liveButton');
+            let isLive = false;
+
+            function getCurrentJulianDate() {
+                const now = new Date();
+                const julianDate = (now.getTime() / 86400000) + 2440587.5;
+                return julianDate;
+            }
+            function getOrbitalElements(planet, julianDate) {
+                // This is a simplified calculation and might not be 100% accurate
+                const t = (julianDate - 2451545.0) / 36525; // Julian centuries since J2000.0
+                const meanLongitude = (planet.meanAnomaly + planet.argPerigee + planet.longAscNode + 180 * t / planet.period) % 360;
+                const M = (meanLongitude - planet.argPerigee - planet.longAscNode) % 360;
+                return {
+                    M: M * Math.PI / 180,
+                    e: planet.eccentricity,
+                    a: planet.semiMajorAxis,
+                    i: planet.inclination,
+                    omega: planet.longAscNode,
+                    w: planet.argPerigee
+                };
+            }
+
+            function updatePlanetPositions(julianDate) {
+                planets.forEach(planet => {
+                    if (!planet.isNEO || (planet.isNEO && showNEOs)) {
+                        const elements = getOrbitalElements(planet, julianDate);
+                        const E = keplerSolve(elements.e, elements.M);
+                        
+                        const x = elements.a * (Math.cos(E) - elements.e);
+                        const y = elements.a * Math.sqrt(1 - elements.e * elements.e) * Math.sin(E);
+
+                        const cosLAN = Math.cos(elements.omega);
+                        const sinLAN = Math.sin(elements.omega);
+                        const cosI = Math.cos(elements.i);
+                        const sinI = Math.sin(elements.i);
+                        const cosAP = Math.cos(elements.w);
+                        const sinAP = Math.sin(elements.w);
+
+                        const xRot = (cosLAN * cosAP - sinLAN * sinAP * cosI) * x + (-cosLAN * sinAP - sinLAN * cosAP * cosI) * y;
+                        const yRot = (sinLAN * cosAP + cosLAN * sinAP * cosI) * x + (-sinLAN * sinAP + cosLAN * cosAP * cosI) * y;
+                        const zRot = (sinAP * sinI) * x + (cosAP * sinI) * y;
+
+                        planet.mesh.position.set(xRot, zRot, -yRot);
+
+                        if (planet.mesh.visible) {
+                            const screenPosition = toScreenPosition(planet.mesh.position, camera);
+                            labels[planet.name].style.left = `${screenPosition.x}px`;
+                            labels[planet.name].style.top = `${screenPosition.y - 20}px`;
+                        }
+                    }
+                });
+            }
+
+            liveButton.addEventListener('click', () => {
+                isLive = !isLive;
+                liveButton.textContent = isLive ? 'Stop Live' : 'Live Positions';
+                liveButton.style.backgroundColor = isLive ? '#32cd32' : '#ff4500';
+            });
+
+    
+            updateNEOVisibility();
+    
+            toggleNEOButton.addEventListener('click', () => {
+                showNEOs = !showNEOs;
+                updateNEOVisibility();
+                toggleNEOButton.textContent = showNEOs ? 'Hide NEO' : 'Show NEO';
+            });
+            const toggleDustButton = document.getElementById('toggleDustButton');
+            let dustVisible = true;
+            toggleDustButton.addEventListener('click', () => {
+                dustVisible = !dustVisible;
+                dustCloud.visible = dustVisible;
+                toggleDustButton.textContent = dustVisible ? 'Hide Dust' : 'Show Dust';
+            });
+            const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
+
+        function onMouseClick(event) {
+            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+            raycaster.setFromCamera(mouse, camera);
+
+            const intersects = raycaster.intersectObjects([sun, planets[2].mesh, planets[2].orbit]);
+
+            if (intersects.length > 0) {
+                const object = intersects[0].object;
+                let title, description;
+
+                if (object === sun) {
+                    title = "Sun";
+                    description = "The Sun is the star at the center of the Solar System. It is a nearly perfect sphere of hot plasma, heated to incandescence by nuclear fusion reactions in its core. The Sun radiates this energy mainly as light, ultraviolet, and infrared radiation, and is the most important source of energy for life on Earth.";
+                } else if (object === planets[2].mesh) {
+                    title = "Earth";
+                    description = "Earth is the third planet from the Sun and the only astronomical object known to harbor life. About 29.2% of Earth's surface is land consisting of continents and islands. The remaining 70.8% is covered with water, mostly by oceans, seas, gulfs, and other salt-water bodies, but also by lakes, rivers, and other fresh water, which together constitute the hydrosphere.";
+                } else if (object === planets[2].orbit) {
+                    title = "Earth's Orbit";
+                    description = "Earth's orbit is the path through which Earth travels around the Sun. Earth's orbital period is about 365.25 days. The orbit is not perfectly circular, but slightly elliptical with the average distance from the Sun being about 93 million miles (150 million kilometers).";
+                }
+
+                showPopup(title, description);
+            }
+        }
+
+        function showPopup(title, description) {
+            const popup = document.getElementById('popup');
+            const popupTitle = document.getElementById('popup-title');
+            const popupDescription = document.getElementById('popup-description');
+
+            popupTitle.textContent = title;
+            popupDescription.textContent = description;
+            popup.style.display = 'block';
+        }
+
+        document.addEventListener('click', onMouseClick, false);
+
+        const closePopup = document.querySelector('.popup-close');
+        closePopup.addEventListener('click', () => {
+            document.getElementById('popup').style.display = 'none';
+        });
+    
+            function animate() {
+                requestAnimationFrame(animate);
+                const deltaTime = clock.getDelta();
+    
+                const time = Date.now() * 0.001 * revolutionSpeed;
+                sun.rotation.y += 0.001;
+                sunGlow.rotation.y += 0.001;
+                dustCloud.rotation.y += 0.0001 * revolutionSpeed;
+                if (isLive) {
+                    const currentJulianDate = getCurrentJulianDate();
+                    updatePlanetPositions(currentJulianDate);
+                } else {
+
+                planets.forEach(planet => {
+                    if (!planet.isNEO || (planet.isNEO && showNEOs)) {
+                        const M = (planet.meanAnomaly + (360 * time / (planet.period * 365.25))) * Math.PI / 180;
+                        const E = keplerSolve(planet.eccentricity, M);
+                        
+                        const x = planet.semiMajorAxis * (Math.cos(E) - planet.eccentricity);
+                        const y = planet.semiMajorAxis * Math.sqrt(1 - planet.eccentricity * planet.eccentricity) * Math.sin(E);
+    
+                        const cosLAN = Math.cos(planet.longAscNode);
+                        const sinLAN = Math.sin(planet.longAscNode);
+                        const cosI = Math.cos(planet.inclination);
+                        const sinI = Math.sin(planet.inclination);
+                        const cosAP = Math.cos(planet.argPerigee);
+                        const sinAP = Math.sin(planet.argPerigee);
+    
+                        const xRot = (cosLAN * cosAP - sinLAN * sinAP * cosI) * x + (-cosLAN * sinAP - sinLAN * cosAP * cosI) * y;
+                        const yRot = (sinLAN * cosAP + cosLAN * sinAP * cosI) * x + (-sinLAN * sinAP + cosLAN * cosAP * cosI) * y;
+                        const zRot = (sinAP * sinI) * x + (cosAP * sinI) * y;
+    
+                        planet.mesh.position.set(xRot, zRot, -yRot);
+                         // Add rotation
+                         const rotationSpeed = (2 * Math.PI / (planet.rotationPeriod * 3600)) * revolutionSpeed;
+                        planet.rotationAngle += rotationSpeed * deltaTime * (planet.rotationDirection === "retrograde" ? -1 : 1);
+                        planet.mesh.rotation.y = planet.rotationAngle;
+                         // Debugging: Log rotation information
+                        console.log(`${planet.name} - Rotation Angle: ${planet.rotationAngle.toFixed(4)}, Rotation Speed: ${planet.rotationSpeed.toFixed(6)}, Delta Time: ${deltaTime.toFixed(4)}`);
+
+    
+                        if (planet.mesh.visible) {
+                            const screenPosition = toScreenPosition(planet.mesh.position, camera);
+                            labels[planet.name].style.left = `${screenPosition.x}px`;
+                            labels[planet.name].style.top = `${screenPosition.y - 20}px`;
+                        }
+                    }
+                });
+                }
+    
+                controls.update();
+                if (planets[2] && planets[2].orbit) {
+                planets[2].orbit.raycast = function(raycaster, intersects) {
+                    const points = this.geometry.attributes.position.array;
+                    const threshold = 0.1; // Adjust this value to change the "thickness" of the orbit line
+
+                    for (let i = 0; i < points.length; i += 3) {
+                        const point = new THREE.Vector3(points[i], points[i + 1], points[i + 2]);
+                        const distance = raycaster.ray.distanceToPoint(point);
+
+                        if (distance < threshold) {
+                            intersects.push({
+                                distance: distance,
+                                point: point,
+                                object: this
+                            });
+                            break;
+                        }
+                    }
+                };
+            }
+
+          
+                renderer.render(scene, camera);
+            }
+            function testRotation() {
+    planets.forEach(planet => {
+        planet.mesh.rotation.y += Math.PI / 4; // Rotate by 45 degrees
+        console.log(`${planet.name} rotated to ${planet.mesh.rotation.y}`);
+    });
+}
+
+
+
+    
+            function toScreenPosition(position, camera) {
+                const vector = position.clone();
+                vector.project(camera);
+                return {
+                    x: (vector.x * 0.5 + 0.5) * window.innerWidth,
+                    y:(-(vector.y * 0.5) + 0.5) * window.innerHeight
+                };
+            }
+    
+            animate();
+    }
+    
+    executeAfterData()
+    </script>
+</body>
+</html><!DOCTYPE html>
+<html>
+<head>
+    <title>Complete 3D Orrery with Clickable Objects</title>
+    <style>
+        body { margin: 0; overflow: hidden; }
+        canvas { display: block; }
+        .label {
+            position: absolute;
+            color: white;
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+            pointer-events: none;
+            text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+        }
+        .slider {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 100;
+        }
+        .toggle-button {
+            position: absolute;
+            left: 20px;
+            z-index: 100;
+            padding: 5px 10px;
+            background-color: #444;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        #toggleOrbitsButton { top: 80px; }
+        #toggleLabelsButton { top: 120px; }
+        #toggleNEOButton { top: 160px; }
+        #toggleDustButton { top: 200px; }
+        .popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            z-index: 1000;
+            max-width: 400px;
+        }
+        .popup h2 {
+            margin-top: 0;
+        }
+        .popup-close {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
