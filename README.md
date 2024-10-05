@@ -2,10 +2,7 @@
 
 # 🌌 Orrery Web App: Exploring Near-Earth Objects (NEOs)
 
-**An interactive 3D web app visualizing celestial bodies like planets, Near-Earth Asteroids (NEAs), Near-Earth Comets (NECs), and Potentially Hazardous Asteroids (PHAs), with real-time data integration from space agencies.**
-
-[![Demo Video](https://img.youtube.com/vi/xyz12345678/0.jpg)](https://www.youtube.com/watch?v=xyz12345678)  
-*Click the image to watch the demo*
+An interactive 3D web app visualizing celestial bodies like planets, Near-Earth Asteroids (NEAs), Near-Earth Comets (NECs), and Potentially Hazardous Asteroids (PHAs), with real-time data integration from space agencies.
 
 ---
 
