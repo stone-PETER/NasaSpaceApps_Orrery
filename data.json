@@ -50,7 +50,11 @@
     "isNEO": "FALSE",
     "isPHA": "FALSE",
     "isCOMET": "FALSE",
-    "texture": "2k_earth_daymap.jpg",
+    "texture": "textures/earth/00_earthmap1k.jpg",
+    "specularMap": "textures/earth/02_earthspec1k.jpg",
+    "bumpMap": "textures/earth/01_earthbump1k.jpg",
+    "lightsMap": "textures/earth/03_earthlights1k.jpg" ,
+    "cloudsMap": "textures/earth/04_earthcloudmap.jpg", 
     "rotation period (hours)": 24,
     "rotation direction": "prograde"
 
