@@ -12,6 +12,7 @@
     "name": "mercury",
     "isNEO": "FALSE",
     "isPHA": "FALSE",
+    "isCOMET": "FALSE",
     "texture": "2k_mercury.jpg",
     "rotation period (hours)": 1407.6,
     "rotation direction": "prograde"
@@ -29,8 +30,9 @@
     "name": "Venus",
     "isNEO": "FALSE",
     "isPHA": "FALSE",
+    "isCOMET": "FALSE",
     "texture": "2k_venus_surface.jpg",
-    "rotation period (hours)": 5832.5,
+    "rotation period (hours)": -5832.5,
     "rotation direction": "retrograde"
 
   },
@@ -47,6 +49,7 @@
     "name": "Earth",
     "isNEO": "FALSE",
     "isPHA": "FALSE",
+    "isCOMET": "FALSE",
     "texture": "textures/earth/00_earthmap1k.jpg",
     "specularMap": "textures/earth/02_earthspec1k.jpg",
     "bumpMap": "textures/earth/01_earthbump1k.jpg",
@@ -69,6 +72,7 @@
     "name": "Mars",
     "isNEO": "FALSE",
     "isPHA": "FALSE",
+    "isCOMET": "FALSE",
     "texture": "2k_mars.jpg",
     "rotation period (hours)": 24.6,
     "rotation direction": "prograde"
@@ -86,6 +90,7 @@
     "name": "Jupiter",
     "isNEO": "FALSE",
     "isPHA": "FALSE",
+    "isCOMET": "FALSE",
     "texture": "2k_jupiter.jpg",
     "rotation period (hours)": 9.9,
     "rotation direction": "prograde"
@@ -103,6 +108,7 @@
     "name": "Saturn",
     "isNEO": "FALSE",
     "isPHA": "FALSE",
+    "isCOMET": "FALSE",
     "texture": "2k_saturn.jpg",
     "rotation period (hours)": 10.7,
     "rotation direction": "prograde"
@@ -120,6 +126,7 @@
     "name": "Uranus",
     "isNEO": "FALSE",
     "isPHA": "FALSE",
+    "isCOMET": "FALSE",
     "texture": "2k_uranus.jpg",
     "rotation period (hours)": 17.2,
     "rotation direction": "retrograde"
@@ -137,6 +144,7 @@
     "name": "Neptune",
     "isNEO": "FALSE",
     "isPHA": "FALSE",
+    "isCOMET": "FALSE",
     "texture": "2k_neptune.jpg",
     "rotation period (hours)": 16.1,
     "rotation direction": "prograde"
@@ -154,6 +162,7 @@
     "name": "Atira",
     "isNEO": "TRUE",
     "isPHA": "FALSE",
+    "isCOMET": "FALSE",
     "texture": "2k_haumea_fictional.jpg",
     "rotation period (hours)": 24,
     "rotation direction": "prograde"
@@ -171,6 +180,7 @@
     "name": "164294 2004 XZ130",
     "isNEO": "TRUE",
     "isPHA": "FALSE",
+    "isCOMET": "FALSE",
     "texture": "2k_haumea_fictional.jpg",
     "rotation period (hours)": 24,
     "rotation direction": "prograde"
@@ -188,6 +198,7 @@
     "name": "418265 2008 EA32",
     "isNEO": "TRUE",
     "isPHA": "FALSE",
+    "isCOMET": "FALSE",
     "texture": "2k_haumea_fictional.jpg",
     "rotation period (hours)": 24,
     "rotation direction": "prograde"
@@ -205,6 +216,7 @@
     "name": "413563 2005 TG45",
     "isNEO": "TRUE",
     "isPHA": "FALSE",
+    "isCOMET": "FALSE",
     "texture": "2k_haumea_fictional.jpg",
     "rotation period (hours)": 24,
     "rotation direction": "prograde"
@@ -222,6 +234,7 @@
     "name": "594913 Aylo\\'chaxnim 2020 AV2",
     "isNEO": "TRUE",
     "isPHA": "FALSE",
+    "isCOMET": "FALSE",
     "texture": "2k_haumea_fictional.jpg",
     "rotation period (hours)": 24,
     "rotation direction": "prograde"
@@ -239,6 +252,7 @@
     "name": "481817 2008 UL90",
     "isNEO": "TRUE",
     "isPHA": "TRUE",
+    "isCOMET": "FALSE",
     "texture": "2k_haumea_fictional.jpg",
     "rotation period (hours)": 24,
     "rotation direction": "prograde"
@@ -256,6 +270,7 @@
     "name": "613676 2006 WE4",
     "isNEO": "TRUE",
     "isPHA": "FALSE",
+    "isCOMET": "FALSE",
     "texture": "2k_haumea_fictional.jpg",
     "rotation period (hours)": 24,
     "rotation direction": "prograde"
@@ -273,6 +288,7 @@
     "name": "434326 2004 JG6",
     "isNEO": "TRUE",
     "isPHA": "TRUE",
+    "isCOMET": "FALSE",
     "texture": "2k_haumea_fictional.jpg",
     "rotation period (hours)": 24,
     "rotation direction": "prograde"
@@ -290,6 +306,7 @@
     "name": "678861 2017 YH",
     "isNEO": "TRUE",
     "isPHA": "FALSE",
+    "isCOMET": "FALSE",
     "texture": "2k_haumea_fictional.jpg",
     "rotation period (hours)": 24,
     "rotation direction": "prograde"
@@ -307,6 +324,7 @@
     "name": "1998 DK36",
     "isNEO": "TRUE",
     "isPHA": "FALSE",
+    "isCOMET": "FALSE",
     "texture": "2k_haumea_fictional.jpg",
     "rotation period (hours)": 24,
     "rotation direction": "prograde"
@@ -324,6 +342,7 @@
     "name": "2010 XB11",
     "isNEO": "TRUE",
     "isPHA": "FALSE",
+    "isCOMET": "FALSE",
     "texture": "2k_haumea_fictional.jpg",
     "rotation period (hours)": 24,
     "rotation direction": "prograde"
@@ -341,6 +360,7 @@
     "name": "2012 VE46",
     "isNEO": "TRUE",
     "isPHA": "TRUE",
+    "isCOMET": "FALSE",
     "texture": "2k_haumea_fictional.jpg",
     "rotation period (hours)": 24,
     "rotation direction": "prograde"
@@ -358,6 +378,7 @@
     "name": "2013 JX28",
     "isNEO": "TRUE",
     "isPHA": "FALSE",
+    "isCOMET": "FALSE",
     "texture": "2k_haumea_fictional.jpg",
     "rotation period (hours)": 24,
     "rotation direction": "prograde"
@@ -375,6 +396,7 @@
     "name": "2013 TQ5",
     "isNEO": "TRUE",
     "isPHA": "FALSE",
+    "isCOMET": "FALSE",
     "texture": "2k_haumea_fictional.jpg",
     "rotation period (hours)": 24,
     "rotation direction": "prograde"
@@ -392,6 +414,7 @@
     "name": "2014 FO47",
     "isNEO": "TRUE",
     "isPHA": "TRUE ",
+    "isCOMET": "FALSE",
     "texture": "2k_haumea_fictional.jpg",
     "rotation period (hours)": 24,
     "rotation direction": "prograde"
@@ -409,6 +432,7 @@
     "name": "2015 DR215",
     "isNEO": "TRUE",
     "isPHA": "TRUE",
+    "isCOMET": "FALSE",
     "texture": "2k_haumea_fictional.jpg",
     "rotation period (hours)": 24,
     "rotation direction": "prograde"
@@ -426,6 +450,7 @@
     "name": "2017 XA1",
     "isNEO": "TRUE",
     "isPHA": "TRUE",
+    "isCOMET": "FALSE",
     "texture": "2k_haumea_fictional.jpg",
     "rotation period (hours)": 24,
     "rotation direction": "prograde"
@@ -443,6 +468,7 @@
     "name": "2018 JB3",
     "isNEO": "TRUE",
     "isPHA": "FALSE",
+    "isCOMET": "FALSE",
     "texture": "2k_haumea_fictional.jpg",
     "rotation period (hours)": 24,
     "rotation direction": "prograde"
@@ -460,6 +486,7 @@
     "name": "2019 AQ3",
     "isNEO": "TRUE",
     "isPHA": "FALSE",
+    "isCOMET": "FALSE",
     "texture": "2k_haumea_fictional.jpg",
     "rotation period (hours)": 24,
     "rotation direction": "prograde"
@@ -477,6 +504,7 @@
     "name": "2019 LF6",
     "isNEO": "TRUE",
     "isPHA": "FALSE",
+    "isCOMET": "FALSE",
     "texture": "2k_haumea_fictional.jpg",
     "rotation period (hours)": 24,
     "rotation direction": "prograde"
@@ -494,6 +522,7 @@
     "name": "2020 HA10",
     "isNEO": "TRUE",
     "isPHA": "FALSE",
+    "isCOMET": "FALSE",
     "texture": "2k_haumea_fictional.jpg",
     "rotation period (hours)": 24,
     "rotation direction": "prograde"
@@ -511,6 +540,7 @@
     "name": "2020 OV1",
     "isNEO": "TRUE",
     "isPHA": "FALSE",
+    "isCOMET": "FALSE",
     "texture": "2k_haumea_fictional.jpg",
     "rotation period (hours)": 24,
     "rotation direction": "prograde"
@@ -528,6 +558,7 @@
     "name": "2021 BS1",
     "isNEO": "TRUE",
     "isPHA": "FALSE",
+    "isCOMET": "FALSE",
     "texture": "2k_haumea_fictional.jpg",
     "rotation period (hours)": 24,
     "rotation direction": "prograde"
@@ -545,6 +576,7 @@
     "name": "2021 LJ4",
     "isNEO": "TRUE",
     "isPHA": "FALSE",
+    "isCOMET": "FALSE",
     "texture": "2k_haumea_fictional.jpg",
     "rotation period (hours)": 24,
     "rotation direction": "prograde"
@@ -562,6 +594,7 @@
     "name": "2021 PB2",
     "isNEO": "TRUE",
     "isPHA": "FALSE",
+    "isCOMET": "FALSE",
     "texture": "2k_haumea_fictional.jpg",
     "rotation period (hours)": 24,
     "rotation direction": "prograde"
@@ -579,6 +612,7 @@
     "name": "2021 PH27",
     "isNEO": "TRUE",
     "isPHA": "FALSE",
+    "isCOMET": "FALSE",
     "texture": "2k_haumea_fictional.jpg",
     "rotation period (hours)": 24,
     "rotation direction": "prograde"
@@ -596,6 +630,7 @@
     "name": "2021 VR3",
     "isNEO": "TRUE",
     "isPHA": "FALSE",
+    "isCOMET": "FALSE",
     "texture": "2k_haumea_fictional.jpg",
     "rotation period (hours)": 24,
     "rotation direction": "prograde"
@@ -613,6 +648,7 @@
     "name": "2022 BJ8",
     "isNEO": "TRUE",
     "isPHA": "FALSE",
+    "isCOMET": "FALSE",
     "texture": "2k_haumea_fictional.jpg",
     "rotation period (hours)": 24,
     "rotation direction": "prograde"
@@ -630,6 +666,7 @@
     "name": "2023 EL",
     "isNEO": "TRUE",
     "isPHA": "FALSE",
+    "isCOMET": "FALSE",
     "texture": "2k_haumea_fictional.jpg",
     "rotation period (hours)": 24,
     "rotation direction": "prograde"
@@ -647,6 +684,7 @@
     "name": "2023 EY2",
     "isNEO": "TRUE",
     "isPHA": "FALSE",
+    "isCOMET": "FALSE",
     "texture": "2k_haumea_fictional.jpg",
     "rotation period (hours)": 24,
     "rotation direction": "prograde"
@@ -664,6 +702,7 @@
     "name": "2023 KQ5",
     "isNEO": "TRUE",
     "isPHA": "FALSE",
+    "isCOMET": "FALSE",
     "texture": "2k_haumea_fictional.jpg",
     "rotation period (hours)": 24,
     "rotation direction": "prograde"
@@ -681,8 +720,120 @@
     "name": "2023 WK3",
     "isNEO": "TRUE",
     "isPHA": "TRUE",
+    "isCOMET": "FALSE",
     "texture": "2k_haumea_fictional.jpg",
     "rotation period (hours)": 24,
     "rotation direction": "prograde"
-  }
+  },
+  {
+    "size": 0.1,
+    "color":  "rgba(255, 255, 255, 0)",
+    "semi-major axis (AU)": 2.219588160856368,
+    "eccentricity": 0.8483810535820915,
+    "inclination (deg)": 11.48492503135146,
+    "longitude of ascending node (deg)": 334.2927888937932,
+    "argument of perihelion (deg)": 187.0339377242105,
+    "mean anomaly (deg)": 219.1246435590082,
+    "orbital period (years)": 3.306867559752303,
+    "name": "2P/Encke",
+    "isNEO": "TRUE",
+    "isPHA": "FALSE",
+    "isCOMET":"TRUE",
+    "texture": "2k_haumea_fictional.jpg",
+    "rotation period (hours)": 24,
+    "rotation direction": "prograde"
+  },
+  {
+    "size": 0.1,
+    "color":  "rgba(255, 255, 255, 0)",
+    "semi-major axis (AU)": 2.677573002117349,
+    "eccentricity": 0.6482479664610991,
+    "inclination (deg)": 10.97729838917803,
+    "longitude of ascending node (deg)": 69.4794170401655,
+    "argument of perihelion (deg)": 199.0907015125213,
+    "mean anomaly (deg)": 349.1638284696513,
+    "orbital period (years)": 4.381473434587702,
+    "name": "73P/Schwassmann-Wachmann 3-AW",
+    "isNEO": "TRUE",
+    "isPHA": "FALSE",
+    "isCOMET": "TRUE",
+    "texture": "2k_haumea_fictional.jpg",
+    "rotation period (hours)": 24,
+    "rotation direction": "prograde"
+  },
+  {
+    "size": 0.1,
+    "color":  "rgba(255, 255, 255, 0)",
+    "semi-major axis (AU)": 2.644728872743298,
+    "eccentricity": 0.6413970858112291,
+    "inclination (deg)": 10.90021895330842,
+    "longitude of ascending node (deg)": 69.50024333070002,
+    "argument of perihelion (deg)": 198.5021590379824,
+    "mean anomaly (deg)": 345.3338812764219,
+    "orbital period (years)": 4.370734097276298,
+    "name": "73P/Schwassmann-Wachmann 3-AZ",
+    "isNEO": "TRUE",
+    "isPHA": "FALSE",
+    "isCOMET": "TRUE",
+    "texture": "2k_haumea_fictional.jpg",
+    "rotation period (hours)": 24,
+    "rotation direction": "prograde"
+},
+{
+  "size": 0.1,
+  "color":  "rgba(255, 255, 255, 0)",
+  "semi-major axis (AU)": 1.90707598598611,
+  "eccentricity": 0.902090810293565,
+  "inclination (deg)": 18.1743253370403,
+  "longitude of ascending node (deg)": 23.4731688410342,
+  "argument of perihelion (deg)": 28.1372689413303,
+  "mean anomaly (deg)": 5.92458483956066,
+  "orbital period (years)": 3.194,
+  "name": "C/2020 P4-B",
+  "isNEO": "TRUE",
+  "isPHA": "FALSE",
+  "isCOMET": "TRUE",
+  "texture": "2k_haumea_fictional.jpg",
+  "rotation period (hours)": 24,
+  "rotation direction": "prograde"
+},
+{
+  "size": 0.1,
+  "color": "rgba(255, 255, 255, 0)",
+  "semi-major axis (AU)": 1.305450410793916,
+  "eccentricity": 0.9394205210769577,
+  "inclination (deg)": 156.2941869123366,
+  "longitude of ascending node (deg)": 128.5079211401399,
+  "argument of perihelion (deg)": 119.61717171131,
+  "mean anomaly (deg)": 359.997624781177,
+  "orbital period (years)": 16987.26484234177,
+  "name": "C/2020 P4-C",
+  "isNEO": "TRUE",
+  "isPHA": "FALSE",
+  "isCOMET": "TRUE",
+  "texture": "2k_haumea_fictional.jpg",
+  "rotation period (hours)": 24,
+  "rotation direction": "prograde"
+},
+{
+  "size": 0.1,
+  "color": "rgba(255, 255, 255, 0)",
+  "semi-major axis (AU)": 2.228328478643237,
+  "eccentricity": 0.697834788456784,
+  "inclination (deg)": 16.72709135721861,
+  "longitude of ascending node (deg)": 62.05005183283982,
+  "argument of perihelion (deg)": 359.7102954583459,
+  "mean anomaly (deg)": 0.3921747925841545,
+  "orbital period (years)": 3.327100433262081,
+  "name": "P/2024 L4 (Rankin)",
+  "isNEO": "TRUE",
+  "isPHA": "FALSE",
+  "isCOMET": "TRUE",
+  "texture": "2k_haumea_fictional.jpg",
+  "rotation period (hours)": 24,
+  "rotation direction": "prograde"
+}
+
+  
+  
 ]
