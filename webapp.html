@@ -118,11 +118,90 @@
     <button id="toggleCOMETButton" class="toggle-button">Show COMET</button>
     <button id="toggleDustButton" class="toggle-button">Hide Dust</button>
     <button id="liveButton" class="live-button">Live Positions</button>
+    <button id="addObjectButton" class="toggle-button" style="top: 360px;">Add Object</button>
 
     <div id="popup" class="popup">
       <span class="popup-close">&times;</span>
       <h2 id="popup-title"></h2>
       <p id="popup-description"></p>
+    </div>
+    <div id="addObjectForm" class="popup" style="width: 400px; height: 80vh; overflow-y: auto;">
+      <span class="popup-close">&times;</span>
+      <h2>Add New Space Object</h2>
+      
+      <select id="objectType" style="margin-bottom: 10px; width: 100%; padding: 5px;">
+        <option value="">Select object type</option>
+        <option value="PHA">Potentially Hazardous Asteroid (PHA)</option>
+        <option value="COMET">Comet</option>
+        <option value="NEO">Near-Earth Object (NEO)</option>
+      </select>
+    
+      <div id="objectForm" style="display: none;">
+        <div style="margin-bottom: 10px;">
+          <label for="name">Name:</label>
+          <input type="text" id="name" style="width: 100%;">
+        </div>
+        
+        <div style="margin-bottom: 10px;">
+          <label for="size">Size:</label>
+          <input type="number" id="size" step="0.01" style="width: 100%;">
+        </div>
+        
+        <div style="margin-bottom: 10px;">
+          <label for="color">Color (hex):</label>
+          <input type="color" id="color" style="width: 100%;">
+        </div>
+        
+        <div style="margin-bottom: 10px;">
+          <label for="semiMajorAxis">Semi-major axis (AU):</label>
+          <input type="number" id="semiMajorAxis" step="0.00000001" style="width: 100%;">
+        </div>
+        
+        <div style="margin-bottom: 10px;">
+          <label for="eccentricity">Eccentricity:</label>
+          <input type="number" id="eccentricity" step="0.00000001" style="width: 100%;">
+        </div>
+        
+        <div style="margin-bottom: 10px;">
+          <label for="inclination">Inclination (deg):</label>
+          <input type="number" id="inclination" step="0.00001" style="width: 100%;">
+        </div>
+        
+        <div style="margin-bottom: 10px;">
+          <label for="longAscNode">Longitude of ascending node (deg):</label>
+          <input type="number" id="longAscNode" step="0.00001" style="width: 100%;">
+        </div>
+        
+        <div style="margin-bottom: 10px;">
+          <label for="argPerihelion">Argument of perihelion (deg):</label>
+          <input type="number" id="argPerihelion" step="0.00001" style="width: 100%;">
+        </div>
+        
+        <div style="margin-bottom: 10px;">
+          <label for="meanAnomaly">Mean anomaly (deg):</label>
+          <input type="number" id="meanAnomaly" step="0.00001" style="width: 100%;">
+        </div>
+        
+        <div style="margin-bottom: 10px;">
+          <label for="orbitalPeriod">Orbital period (years):</label>
+          <input type="number" id="orbitalPeriod" step="0.001" style="width: 100%;">
+        </div>
+        
+        <div style="margin-bottom: 10px;">
+          <label for="rotationPeriod">Rotation period (hours):</label>
+          <input type="number" id="rotationPeriod" step="0.1" style="width: 100%;">
+        </div>
+        
+        <div style="margin-bottom: 10px;">
+          <label for="rotationDirection">Rotation direction:</label>
+          <select id="rotationDirection" style="width: 100%;">
+            <option value="prograde">Prograde</option>
+            <option value="retrograde">Retrograde</option>
+          </select>
+        </div>
+        
+        <button id="submitObject" style="width: 100%; padding: 10px; background-color: #4CAF50; color: white; border: none; cursor: pointer;">Add Object</button>
+      </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/three@latest/build/three.min.js"></script>
@@ -733,10 +812,12 @@ toggleCOMETButton.addEventListener("click", () => {
 
         document.addEventListener("click", onMouseClick, false);
 
-        const closePopup = document.querySelector(".popup-close");
-        closePopup.addEventListener("click", () => {
-          document.getElementById("popup").style.display = "none";
-        });
+        const closePopup = document.querySelectorAll('.popup-close').forEach(button => {
+  button.addEventListener('click', () => {
+    button.parentElement.style.display = 'none';
+  });
+});
+        
         function updateCometTail(comet, E) {
   const tailPoints = [];
   const tailLength = 2*Math.PI/3; // Half orbit
@@ -775,7 +856,115 @@ toggleCOMETButton.addEventListener("click", () => {
   comet.cometTail.geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
   comet.cometTail.material.vertexColors = true;
 }
+// Add this JavaScript code after your existing code
+document.getElementById('addObjectButton').addEventListener('click', () => {
+  document.getElementById('addObjectForm').style.display = 'block';
+});
 
+document.getElementById('objectType').addEventListener('change', function() {
+  const form = document.getElementById('objectForm');
+  if (this.value) {
+    form.style.display = 'block';
+  } else {
+    form.style.display = 'none';
+  }
+});
+
+// Update the object addition functionality
+document.getElementById('submitObject').addEventListener('click', () => {
+  const type = document.getElementById('objectType').value;
+  const newObject = {
+    name: document.getElementById('name').value,
+    size: parseFloat(document.getElementById('size').value),
+    color: document.getElementById('color').value.replace('#', '0x'),
+    "semi-major axis (AU)": parseFloat(document.getElementById('semiMajorAxis').value),
+    eccentricity: parseFloat(document.getElementById('eccentricity').value),
+    "inclination (deg)": parseFloat(document.getElementById('inclination').value),
+    "longitude of ascending node (deg)": parseFloat(document.getElementById('longAscNode').value),
+    "argument of perihelion (deg)": parseFloat(document.getElementById('argPerihelion').value),
+    "mean anomaly (deg)": parseFloat(document.getElementById('meanAnomaly').value),
+    "orbital period (years)": parseFloat(document.getElementById('orbitalPeriod').value),
+    "rotation period (hours)": parseFloat(document.getElementById('rotationPeriod').value),
+    "rotation direction": document.getElementById('rotationDirection').value,
+    texture: "2k_venus_surface.jpg", // Default texture
+    isNEO: type === 'NEO' ? "TRUE" : "FALSE",
+    isPHA: type === 'PHA' ? "TRUE" : "FALSE",
+    isCOMET: type === 'COMET' ? "TRUE" : "FALSE"
+  };
+
+  // Add the new object to the json array
+  json.push(newObject);
+
+  // Create the new celestial object
+  const newPlanet = createPlanet(
+    newObject.size,
+    newObject.color,
+    newObject["semi-major axis (AU)"],
+    newObject.eccentricity,
+    newObject["inclination (deg)"],
+    newObject["longitude of ascending node (deg)"],
+    newObject["argument of perihelion (deg)"],
+    newObject["mean anomaly (deg)"],
+    newObject["orbital period (years)"],
+    newObject.name,
+    newObject.isNEO === "TRUE",
+    newObject.isPHA === "TRUE",
+    newObject.isCOMET === "TRUE",
+    newObject.texture,
+    newObject["rotation period (hours)"],
+    newObject["rotation direction"]
+  );
+
+  // Create orbit for the new object
+  const orbitPoints = [];
+  for (let i = 0; i <= 360; i++) {
+    const angle = (i * Math.PI) / 180;
+    const E = keplerSolve(newPlanet.eccentricity, angle);
+    const x = newPlanet.semiMajorAxis * (Math.cos(E) - newPlanet.eccentricity);
+    const y = newPlanet.semiMajorAxis * Math.sqrt(1 - newPlanet.eccentricity * newPlanet.eccentricity) * Math.sin(E);
+
+    const cosLAN = Math.cos(newPlanet.longAscNode);
+    const sinLAN = Math.sin(newPlanet.longAscNode);
+    const cosI = Math.cos(newPlanet.inclination);
+    const sinI = Math.sin(newPlanet.inclination);
+    const cosAP = Math.cos(newPlanet.argPerigee);
+    const sinAP = Math.sin(newPlanet.argPerigee);
+
+    const xRot = (cosLAN * cosAP - sinLAN * sinAP * cosI) * x + (-cosLAN * sinAP - sinLAN * cosAP * cosI) * y;
+    const yRot = (sinLAN * cosAP + cosLAN * sinAP * cosI) * x + (-sinLAN * sinAP + cosLAN * cosAP * cosI) * y;
+    const zRot = sinAP * sinI * x + cosAP * sinI * y;
+
+    orbitPoints.push(new THREE.Vector3(xRot, zRot, -yRot));
+  }
+
+  const orbitGeometry = new THREE.BufferGeometry().setFromPoints(orbitPoints);
+  const orbitMaterial = new THREE.LineBasicMaterial({
+    color: parseInt(newObject.color),
+    opacity: 0.5,
+    transparent: true
+  });
+  const orbit = new THREE.Line(orbitGeometry, orbitMaterial);
+  scene.add(orbit);
+  orbits.push(orbit);
+  newPlanet.orbit = orbit;
+
+  // Create label for the new object
+  createLabel(newPlanet);
+
+  // Update visibility based on object type
+  if (newObject.isPHA === "TRUE") {
+    showPHAs ? updatePHAVisibility() : (newPlanet.mesh.visible = false);
+  }
+  if (newObject.isNEO === "TRUE") {
+    showNEOs ? updateNEOVisibility() : (newPlanet.mesh.visible = false);
+  }
+  if (newObject.isCOMET === "TRUE") {
+    showCOMETs ? updateCOMETVisibility() : (newPlanet.mesh.visible = false);
+  }
+
+  // Close the form
+  document.getElementById('addObjectForm').style.display = 'none';
+});
 
 function animate() {
     requestAnimationFrame(animate);
