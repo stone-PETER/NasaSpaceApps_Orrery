@@ -255,88 +255,39 @@ function getFresnelMat({rimHex = 0xffffff, facingHex = 0x000000} = {}) {
       );
 
       function createPlanet(
-    size,
-    color,
-    semiMajorAxis,
-    eccentricity,
-    inclination,
-    longAscNode,
-    argPerigee,
-    meanAnomaly,
-    period,
-    name,
-    isNEO = false,
-    isPHA = false,
-    isCOMET = false,
-    texture,
-    rotationPeriod,
-    rotationDirection,
-    lightsMap,
-    specularMap,
-    bumpMap,
-    cloudsMap,
+  size,
+  color,
+  semiMajorAxis,
+  eccentricity,
+  inclination,
+  longAscNode,
+  argPerigee,
+  meanAnomaly,
+  period,
+  name,
+  isNEO = false,
+  isPHA = false,
+  isCOMET = false,
+  texture,
+  rotationPeriod,
+  rotationDirection,
+  isMoon = false,
+  parentPlanet = null
 ) {
-    
+  const planetTexture = textureLoader.load(texture);
+  const material = new THREE.MeshPhongMaterial({ map: planetTexture,bumpScale: 0.04 });
 
+  const geometry = new THREE.SphereGeometry(size, 32, 32);
 
-    // const material = new THREE.MeshBasicMaterial({
-    //     map: planetTexture,
-    //     // normalMap: normalMapTexture,
-    //     specularMap: specularMapTexture,
-    //     bumpMap: bumpMapTexture,
-    //     // displacementMap: displacementMapTexture,
-    //     // emissiveMap: emissiveMapTexture,
-    //     // roughness: 0.2,
-    //     // metalness: 0.8,
-    // });
+  const planet = new THREE.Mesh(geometry, material);
+  planet.isNEO = isNEO;
+  planet.isPHA = isPHA;
+  planet.isCOMET = isCOMET;
+  planet.isMoon = isMoon;
 
-    sunLight.position.set(0, 0, 0);
-    scene.add(sunLight);
+  scene.add(planet);
 
-    const material = new THREE.MeshPhongMaterial({
-        map: textureLoader.load(texture),
-        specularMap: textureLoader.load(specularMap),
-        bumpMap: textureLoader.load(bumpMap),
-        bumpScale: 0.04,
-        });
-
-
-
-    const geometry = new THREE.SphereGeometry(size, 32, 32);
-
-    const planet = new THREE.Mesh(geometry, material);
-    planet.isNEO = isNEO;
-    planet.isPHA = isPHA;
-
-    const planetMesh = new THREE.Mesh(geometry, material);
-    planet.add(planetMesh);
-
-    const lightsMat = new THREE.MeshBasicMaterial({
-    map: textureLoader.load(lightsMap),
-    blending: THREE.AdditiveBlending,
-    });
-    const lightsMesh = new THREE.Mesh(geometry, lightsMat);
-    planet.add(lightsMesh);
-
-    const cloudsMat = new THREE.MeshStandardMaterial({
-    map: textureLoader.load(cloudsMap),
-    transparent: true,
-    opacity: 0.8,
-    blending: THREE.AdditiveBlending,
-    // alphaTest: 0.3,
-    });
-    const cloudsMesh = new THREE.Mesh(geometry, cloudsMat);
-    cloudsMesh.scale.setScalar(1.003);
-    planet.add(cloudsMesh);
-
-    const fresnelMat = getFresnelMat();
-const glowMesh = new THREE.Mesh(geometry, fresnelMat);
-glowMesh.scale.setScalar(0.99999);
-planet.add(glowMesh);
-
-    scene.add(planet);
-
-        const planetData = {
+  const planetData = {
     mesh: planet,
     semiMajorAxis: semiMajorAxis * scaleFactor,
     eccentricity: eccentricity,
@@ -350,6 +301,8 @@ planet.add(glowMesh);
     isNEO: isNEO,
     isPHA: isPHA,
     isCOMET: isCOMET,
+    isMoon: isMoon,
+    parentPlanet: parentPlanet,
     rotationPeriod: rotationPeriod,
     rotationDirection: rotationDirection,
     rotationAngle: 0,
@@ -417,6 +370,59 @@ planet.add(glowMesh);
 
       const executeAfterData = async () => {
         await getData();
+        // Create the Moon
+  const moon = createPlanet(
+    0.05, // size (relative to Earth's size of 0.44)
+    "0xCCCCCC", // color
+    0.00257 * 50, // semi-major axis (scaled up for visibility)
+    0.0549, // eccentricity
+    5.145, // inclination (degrees)
+    125.08, // longitude of ascending node (degrees)
+    318.15, // argument of perihelion (degrees)
+    115.3654, // mean anomaly (degrees)
+    0.0748, // orbital period (years)
+    "Moon",
+    false, // isNEO
+    false, // isPHA
+    false, // isCOMET
+    "2k_moon.jpg", // Moon texture
+    27.3, // rotation period (days)
+    "prograde",
+    true, // isMoon
+    planets[2] // Assuming Earth is the third planet (index 2) in the planets array
+  );
+
+  planets.push(moon);
+  createLabel(moon);
+
+  // Create Moon's orbit
+  const moonOrbitPoints = [];
+  for (let i = 0; i <= 360; i++) {
+    const angle = (i * Math.PI) / 180;
+    const E = keplerSolve(moon.eccentricity, angle);
+    const x = moon.semiMajorAxis * (Math.cos(E) - moon.eccentricity);
+    const y = moon.semiMajorAxis * Math.sqrt(1 - moon.eccentricity * moon.eccentricity) * Math.sin(E);
+
+    const cosLAN = Math.cos(moon.longAscNode);
+    const sinLAN = Math.sin(moon.longAscNode);
+    const cosI = Math.cos(moon.inclination);
+    const sinI = Math.sin(moon.inclination);
+    const cosAP = Math.cos(moon.argPerigee);
+    const sinAP = Math.sin(moon.argPerigee);
+
+    const xRot = (cosLAN * cosAP - sinLAN * sinAP * cosI) * x + (-cosLAN * sinAP - sinLAN * cosAP * cosI) * y;
+    const yRot = (sinLAN * cosAP + cosLAN * sinAP * cosI) * x + (-sinLAN * sinAP + cosLAN * cosAP * cosI) * y;
+    const zRot = sinAP * sinI * x + cosAP * sinI * y;
+
+    moonOrbitPoints.push(new THREE.Vector3(xRot, zRot, -yRot));
+  }
+
+  const moonOrbitGeometry = new THREE.BufferGeometry().setFromPoints(moonOrbitPoints);
+  const moonOrbitMaterial = new THREE.LineBasicMaterial({ color: 0xCCCCCC, opacity: 0.5, transparent: true });
+  const moonOrbit = new THREE.Line(moonOrbitGeometry, moonOrbitMaterial);
+  scene.add(moonOrbit);
+  moon.orbit = moonOrbit;
+
         // Run only after getdata is completed
         planets.forEach((planet) => createLabel(planet));
         planets.forEach((planet) => {
@@ -509,29 +515,18 @@ planet.add(glowMesh);
           revolutionSpeed = parseFloat(speedSlider.value);
         });
 
-        const toggleOrbitsButton =
-          document.getElementById("toggleOrbitsButton");
-        let orbitsVisible = true;
-        toggleOrbitsButton.addEventListener("click", () => {
-          orbitsVisible = !orbitsVisible;
-          orbits.forEach((orbit) => (orbit.visible = orbitsVisible));
-          toggleOrbitsButton.textContent = orbitsVisible
-            ? "Hide Orbits"
-            : "Show Orbits";
-        });
-
-        const toggleLabelsButton =
-          document.getElementById("toggleLabelsButton");
-        let labelsVisible = true;
-        toggleLabelsButton.addEventListener("click", () => {
-          labelsVisible = !labelsVisible;
-          Object.values(labels).forEach(
-            (label) => (label.style.display = labelsVisible ? "block" : "none")
-          );
-          toggleLabelsButton.textContent = labelsVisible
-            ? "Hide Labels"
-            : "Show Labels";
-        });
+        const toggleOrbitsButton = document.getElementById("toggleOrbitsButton");
+let orbitsVisible = true;
+toggleOrbitsButton.addEventListener("click", () => {
+  orbitsVisible = !orbitsVisible;
+  toggleOrbitsButton.textContent = orbitsVisible ? "Hide Orbits" : "Show Orbits";
+});
+const toggleLabelsButton = document.getElementById("toggleLabelsButton");
+let labelsVisible = true;
+toggleLabelsButton.addEventListener("click", () => {
+  labelsVisible = !labelsVisible;
+  toggleLabelsButton.textContent = labelsVisible ? "Hide Labels" : "Show Labels";
+});
 
         const toggleNEOButton = document.getElementById("toggleNEOButton");
         let showNEOs = false;
@@ -720,6 +715,11 @@ toggleCOMETButton.addEventListener("click", () => {
             showPopup(title, description);
           }
         }
+        function isInView(position, camera) {
+  const frustum = new THREE.Frustum();
+  frustum.setFromProjectionMatrix(new THREE.Matrix4().multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse));
+  return frustum.containsPoint(position);
+}
 
         function showPopup(title, description) {
           const popup = document.getElementById("popup");
@@ -777,73 +777,92 @@ toggleCOMETButton.addEventListener("click", () => {
 }
 
 
-        function animate() {
-  requestAnimationFrame(animate);
-  const deltaTime = clock.getDelta();
+function animate() {
+    requestAnimationFrame(animate);
+    const deltaTime = clock.getDelta();
 
-  const time = Date.now() * 0.001 * revolutionSpeed;
-  sun.rotation.y += 0.001;
-  sunGlow.rotation.y += 0.001;
-  dustCloud.rotation.y += 0.0001 * revolutionSpeed;
-  if (isLive) {
-    const currentJulianDate = getCurrentJulianDate();
-    updatePlanetPositions(currentJulianDate);
+    const time = Date.now() * 0.001 * revolutionSpeed;
+    sun.rotation.y += 0.001;
+    sunGlow.rotation.y += 0.001;
+    dustCloud.rotation.y += 0.0001 * revolutionSpeed;
+
+    if (isLive) {
+      const currentJulianDate = getCurrentJulianDate();
+      updatePlanetPositions(currentJulianDate);
+    } else {
+      planets.forEach((planet) => {
+        if (!planet.isNEO || (planet.isNEO && showNEOs) || (planet.isPHA && showPHAs) || (planet.isCOMET && showCOMETs)) {
+          let M, parentPosition;
+          
+          if (planet.isMoon) {
+            parentPosition = planet.parentPlanet.mesh.position.clone();
+            M = ((planet.meanAnomaly + (360 * time) / (planet.period * 365.25)) * Math.PI) / 180;
+          } else {
+            M = ((planet.meanAnomaly + (360 * time) / (planet.period * 365.25)) * Math.PI) / 180;
+          }
+
+          const E = keplerSolve(planet.eccentricity, M);
+
+          const x = planet.semiMajorAxis * (Math.cos(E) - planet.eccentricity);
+          const y = planet.semiMajorAxis * Math.sqrt(1 - planet.eccentricity * planet.eccentricity) * Math.sin(E);
+
+          const cosLAN = Math.cos(planet.longAscNode);
+          const sinLAN = Math.sin(planet.longAscNode);
+          const cosI = Math.cos(planet.inclination);
+          const sinI = Math.sin(planet.inclination);
+          const cosAP = Math.cos(planet.argPerigee);
+          const sinAP = Math.sin(planet.argPerigee);
+
+          const xRot = (cosLAN * cosAP - sinLAN * sinAP * cosI) * x + (-cosLAN * sinAP - sinLAN * cosAP * cosI) * y;
+          const yRot = (sinLAN * cosAP + cosLAN * sinAP * cosI) * x + (-sinLAN * sinAP + cosLAN * cosAP * cosI) * y;
+          const zRot = sinAP * sinI * x + cosAP * sinI * y;
+
+          if (planet.isMoon) {
+            planet.mesh.position.set(
+              xRot + parentPosition.x,
+              zRot + parentPosition.y,
+              -yRot + parentPosition.z
+            );
+            planet.orbit.position.copy(parentPosition);
+          } else {
+            planet.mesh.position.set(xRot, zRot, -yRot);
+          }
+
+          if (planet.isCOMET && planet.cometTail) {
+            updateCometTail(planet, E);
+          }
+           // Check if the planet is in view
+        const isVisible = isInView(planet.mesh.position, camera);
+
+// Update orbit visibility
+if (planet.orbit) {
+  planet.orbit.visible = orbitsVisible && isVisible;
+}
+
+// Update label visibility
+if (labels[planet.name]) {
+  if (isVisible && labelsVisible) {
+    const screenPosition = toScreenPosition(planet.mesh.position, camera);
+    labels[planet.name].style.display = 'block';
+    labels[planet.name].style.left = `${screenPosition.x}px`;
+    labels[planet.name].style.top = `${screenPosition.y - 20}px`;
   } else {
-    planets.forEach((planet) => {
-      if (!planet.isNEO || (planet.isNEO && showNEOs) || (planet.isPHA && showPHAs)|| (planet.isCOMET && showCOMETs)) {
-        const M =
-          ((planet.meanAnomaly +
-            (360 * time) / (planet.period * 365.25)) *
-            Math.PI) /
-          180;
-        const E = keplerSolve(planet.eccentricity, M);
-
-        const x =
-          planet.semiMajorAxis * (Math.cos(E) - planet.eccentricity);
-        const y =
-          planet.semiMajorAxis *
-          Math.sqrt(1 - planet.eccentricity * planet.eccentricity) *
-          Math.sin(E);
-
-        const cosLAN = Math.cos(planet.longAscNode);
-        const sinLAN = Math.sin(planet.longAscNode);
-        const cosI = Math.cos(planet.inclination);
-        const sinI = Math.sin(planet.inclination);
-        const cosAP = Math.cos(planet.argPerigee);
-        const sinAP = Math.sin(planet.argPerigee);
-
-        const xRot =
-          (cosLAN * cosAP - sinLAN * sinAP * cosI) * x +
-          (-cosLAN * sinAP - sinLAN * cosAP * cosI) * y;
-        const yRot =
-          (sinLAN * cosAP + cosLAN * sinAP * cosI) * x +
-          (-sinLAN * sinAP + cosLAN * cosAP * cosI) * y;
-        const zRot = sinAP * sinI * x + cosAP * sinI * y;
-
-        planet.mesh.position.set(xRot, zRot, -yRot);
-        if (planet.isCOMET && planet.cometTail) {
-          updateCometTail(planet, E);
-        }
-
-        // Add rotation
-        const rotationSpeed = 0.648 / planet.rotationPeriod;
-        // planet.rotationAngle +=
-        //   rotationSpeed *
-        //   deltaTime *
-        //   (planet.rotationDirection === "retrograde" ? -1 : 1);
-        planet.mesh.rotation.y += rotationSpeed;
-
-        if (planet.mesh.visible) {
-          const screenPosition = toScreenPosition(
-            planet.mesh.position,
-            camera
-          );
-          labels[planet.name].style.left = `${screenPosition.x}px`;
-          labels[planet.name].style.top = `${screenPosition.y - 20}px`;
-        }
-      }
-    });
+    labels[planet.name].style.display = 'none';
   }
+}
+
+          // Add rotation
+          const rotationSpeed = 0.648 / planet.rotationPeriod;
+          planet.mesh.rotation.y += rotationSpeed * (planet.rotationDirection === "retrograde" ? -1 : 1);
+
+          if (planet.mesh.visible) {
+            const screenPosition = toScreenPosition(planet.mesh.position, camera);
+            labels[planet.name].style.left = `${screenPosition.x}px`;
+            labels[planet.name].style.top = `${screenPosition.y - 20}px`;
+          }
+        }
+      });
+    }
 
           controls.update();
           if (planets[2] && planets[2].orbit) {
