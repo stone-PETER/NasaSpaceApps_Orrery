@@ -92,7 +92,7 @@
 
     .live-button {
       position: absolute;
-      top: 320px;
+      top: 360px;
       left: 20px;
       z-index: 100;
       padding: 10px 20px;
@@ -110,6 +110,27 @@
       background-color: #ff6347;
       box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2);
     }
+
+    .close-look-button {
+      position: absolute;
+      top: 400px;
+      left: 20px;
+      z-index: 100;
+      padding: 10px 20px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 20px;
+      cursor: pointer;
+      font-weight: bold;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+    }
+
+    .close-look-button:hover {
+      background-color: #45a049;
+      box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2);
+    }
   </style>
 </head>
 
@@ -123,7 +144,8 @@
   <button id="toggleCOMETButton" class="toggle-button">Show COMET</button>
   <button id="toggleDustButton" class="toggle-button">Hide Dust</button>
   <button id="liveButton" class="live-button">Live Positions</button>
-  <button id="addObjectButton" class="toggle-button" style="top: 360px;">Add Object</button>
+  <button id="addObjectButton" class="toggle-button" style="top: 320px;">Add Object</button>
+  <button id="closeLookButton" class="close-look-button">Close Look</button>
 
   <div id="popup" class="popup">
     <span class="popup-close">&times;</span>
@@ -274,57 +296,60 @@
     let simulationSpeed = 1; // Days per second
     const timeScale = 365.25;
 
-      const clock = new THREE.Clock();
-      const dustParticles = new THREE.BufferGeometry();
-const dustCount = 99999;
-const positions = new Float32Array(dustCount * 3);
-const colors = new Float32Array(dustCount * 3);
+    const clock = new THREE.Clock();
+    const dustParticles = new THREE.BufferGeometry();
+    const dustCount = 99999;
+    const positions = new Float32Array(dustCount * 3);
+    const colors = new Float32Array(dustCount * 3);
 
-// Disc parameters
-const radius =6000;  // Radius of the disc
-const height = 100; // Maximum height of the disc (thickness)
+    let scaleFactor = 429;
+    const originalScaleFactor = 429;
+    const closeLookScaleFactor = 10;
 
-dustParticles.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-dustParticles.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+    // Disc parameters
+    let radius = 6 * scaleFactor;  // Radius of the disc
+    const height = 100; // Maximum height of the disc (thickness)
 
-// Material for the particles
-const dustMaterial = new THREE.PointsMaterial({
-  size: 0.5,
-  vertexColors: true,
-  transparent: true,
-  opacity: 0.3,
-});
+    dustParticles.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    dustParticles.setAttribute('color', new THREE.BufferAttribute(colors, 3));
 
-    const dustCloud = new THREE.Points(dustParticles, dustMaterial);
+    // Material for the particles
+    const dustMaterial = new THREE.PointsMaterial({
+      size: 0.5,
+      vertexColors: true,
+      transparent: true,
+      opacity: 0.3,
+    });
 
+    let dustCloud = new THREE.Points(dustParticles, dustMaterial);
+    
+    
 
-      
+    const closeLookButton = document.getElementById("closeLookButton");
+    let isCloseLook = false;
 
+    let moon;
 
-
-
-
-      const scaleFactor = 50;
-      const sunGlowGeometry = new THREE.SphereGeometry(2.1, 32, 32);
-      const sunGlowMaterial = new THREE.MeshBasicMaterial({
-        color: 0xffff00,
-        transparent: true,
-        opacity: 0.3,
-      });
-      const sunGlow = new THREE.Mesh(sunGlowGeometry, sunGlowMaterial);
-      const scene = new THREE.Scene();
-      const camera = new THREE.PerspectiveCamera(
-        75,
-        window.innerWidth / window.innerHeight,
-        0.1,
-        100000
-      );
-      const renderer = new THREE.WebGLRenderer({ antialias: true });
-      const textureLoader = new THREE.TextureLoader();
-      const light = new THREE.PointLight(0xffffff, 5, 430, 0.0001);
-      const sunGeometry = new THREE.SphereGeometry(2, 32, 32);
-      const sunMaterial = new THREE.MeshBasicMaterial({ color: 0xffa500 });
-      const sun = new THREE.Mesh(sunGeometry, sunMaterial);
+    const sunGlowGeometry = new THREE.SphereGeometry(2.1, 32, 32);
+    const sunGlowMaterial = new THREE.MeshBasicMaterial({
+      color: 0xffff00,
+      transparent: true,
+      opacity: 0.3,
+    });
+    const sunGlow = new THREE.Mesh(sunGlowGeometry, sunGlowMaterial);
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(
+      75,
+      window.innerWidth / window.innerHeight,
+      0.1,
+      100000
+    );
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    const textureLoader = new THREE.TextureLoader();
+    const light = new THREE.PointLight(0xffffff, 5, 430, 0.0001);
+    const sunGeometry = new THREE.SphereGeometry(2, 32, 32);
+    const sunMaterial = new THREE.MeshBasicMaterial({ color: 0xffa500 });
+    const sun = new THREE.Mesh(sunGeometry, sunMaterial);
 
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
@@ -356,58 +381,58 @@ const dustMaterial = new THREE.PointsMaterial({
     );
 
     function createPlanet(
-  size,
-  color,
-  semiMajorAxis,
-  eccentricity,
-  inclination,
-  longAscNode,
-  argPerigee,
-  meanAnomaly,
-  period,
-  name,
-  isNEO = false,
-  isPHA = false,
-  isCOMET = false,
-  texture,
-  rotationPeriod,
-  rotationDirection,
-  isMoon = false,
-  parentPlanet = null
-) {
-  const planetTexture = textureLoader.load(texture);
-  const material = new THREE.MeshPhongMaterial({ map: planetTexture, bumpScale: 0.04 });
-  const geometry = new THREE.SphereGeometry(size, 32, 32);
-  const planet = new THREE.Mesh(geometry, material);
-  
-  planet.isNEO = isNEO;
-  planet.isPHA = isPHA;
-  planet.isCOMET = isCOMET;
-  planet.isMoon = isMoon;
+      size,
+      color,
+      semiMajorAxis,
+      eccentricity,
+      inclination,
+      longAscNode,
+      argPerigee,
+      meanAnomaly,
+      period,
+      name,
+      isNEO = false,
+      isPHA = false,
+      isCOMET = false,
+      texture,
+      rotationPeriod,
+      rotationDirection,
+      isMoon = false,
+      parentPlanet = null
+    ) {
+      const planetTexture = textureLoader.load(texture);
+      const material = new THREE.MeshPhongMaterial({ map: planetTexture, bumpScale: 0.04 });
+      const geometry = new THREE.SphereGeometry(size, 32, 32);
+      const planet = new THREE.Mesh(geometry, material);
 
-  scene.add(planet);
+      planet.isNEO = isNEO;
+      planet.isPHA = isPHA;
+      planet.isCOMET = isCOMET;
+      planet.isMoon = isMoon;
 
-  const planetData = {
-    mesh: planet,
-    semiMajorAxis: name === "Sun" ? 0 : semiMajorAxis * scaleFactor,
-    eccentricity: eccentricity,
-    inclination: (inclination * Math.PI) / 180,
-    longAscNode: (longAscNode * Math.PI) / 180,
-    argPerigee: (argPerigee * Math.PI) / 180,
-    meanAnomaly: (meanAnomaly * Math.PI) / 180,
-    period: period,
-    name: name,
-    color: parseInt(color),
-    isNEO: isNEO,
-    isPHA: isPHA,
-    isCOMET: isCOMET,
-    isMoon: isMoon,
-    parentPlanet: parentPlanet,
-    rotationPeriod: rotationPeriod,
-    rotationDirection: rotationDirection,
-    rotationAngle: 0,
-    rotationSpeed: 6.48 / rotationPeriod,
-  };
+      scene.add(planet);
+
+      const planetData = {
+        mesh: planet,
+        semiMajorAxis: name === "Sun" ? 0 : semiMajorAxis * scaleFactor,
+        eccentricity: eccentricity,
+        inclination: (inclination * Math.PI) / 180,
+        longAscNode: (longAscNode * Math.PI) / 180,
+        argPerigee: (argPerigee * Math.PI) / 180,
+        meanAnomaly: (meanAnomaly * Math.PI) / 180,
+        period: period,
+        name: name,
+        color: parseInt(color),
+        isNEO: isNEO,
+        isPHA: isPHA,
+        isCOMET: isCOMET,
+        isMoon: isMoon,
+        parentPlanet: parentPlanet,
+        rotationPeriod: rotationPeriod,
+        rotationDirection: rotationDirection,
+        rotationAngle: 0,
+        rotationSpeed: 6.48 / rotationPeriod,
+      };
       if (isCOMET) {
         const cometTailGeometry = new THREE.BufferGeometry();
         const cometTailMaterial = new THREE.LineBasicMaterial({
@@ -471,9 +496,9 @@ const dustMaterial = new THREE.PointsMaterial({
     const executeAfterData = async () => {
       await getData();
       // Create the Moon
-      const moon = createPlanet(
+      moon = createPlanet(
         0.05, // size (relative to Earth's size of 0.44)
-        "0xCCCCCC", // color
+        0xaabb11, // color
         0.00257 * 50, // semi-major axis (scaled up for visibility)
         0.0549, // eccentricity
         5.145, // inclination (degrees)
@@ -523,48 +548,50 @@ const dustMaterial = new THREE.PointsMaterial({
       scene.add(moonOrbit);
       moon.orbit = moonOrbit;
 
+
+
       // Run only after getdata is completed
       planets.forEach((planet) => createLabel(planet));
       planets.forEach((planet) => {
- // Skip orbit creation for the Sun and Moon
- if (planet.name === "Sun" || planet.isMoon) {
-    return;
-  }
+        // Skip orbit creation for the Sun and Moon
+        if (planet.name === "Sun" || planet.isMoon) {
+          return;
+        }
 
 
-  const orbitPoints = [];
-  for (let i = 0; i <= 360; i++) {
-    const angle = (i * Math.PI) / 180;
-    const E = keplerSolve(planet.eccentricity, angle);
-    const x = planet.semiMajorAxis * (Math.cos(E) - planet.eccentricity);
-    const y = planet.semiMajorAxis * Math.sqrt(1 - planet.eccentricity * planet.eccentricity) * Math.sin(E);
+        const orbitPoints = [];
+        for (let i = 0; i <= 360; i++) {
+          const angle = (i * Math.PI) / 180;
+          const E = keplerSolve(planet.eccentricity, angle);
+          const x = planet.semiMajorAxis * (Math.cos(E) - planet.eccentricity);
+          const y = planet.semiMajorAxis * Math.sqrt(1 - planet.eccentricity * planet.eccentricity) * Math.sin(E);
 
-    const cosLAN = Math.cos(planet.longAscNode);
-    const sinLAN = Math.sin(planet.longAscNode);
-    const cosI = Math.cos(planet.inclination);
-    const sinI = Math.sin(planet.inclination);
-    const cosAP = Math.cos(planet.argPerigee);
-    const sinAP = Math.sin(planet.argPerigee);
+          const cosLAN = Math.cos(planet.longAscNode);
+          const sinLAN = Math.sin(planet.longAscNode);
+          const cosI = Math.cos(planet.inclination);
+          const sinI = Math.sin(planet.inclination);
+          const cosAP = Math.cos(planet.argPerigee);
+          const sinAP = Math.sin(planet.argPerigee);
 
-    const xRot = (cosLAN * cosAP - sinLAN * sinAP * cosI) * x + (-cosLAN * sinAP - sinLAN * cosAP * cosI) * y;
-    const yRot = (sinLAN * cosAP + cosLAN * sinAP * cosI) * x + (-sinLAN * sinAP + cosLAN * cosAP * cosI) * y;
-    const zRot = sinAP * sinI * x + cosAP * sinI * y;
+          const xRot = (cosLAN * cosAP - sinLAN * sinAP * cosI) * x + (-cosLAN * sinAP - sinLAN * cosAP * cosI) * y;
+          const yRot = (sinLAN * cosAP + cosLAN * sinAP * cosI) * x + (-sinLAN * sinAP + cosLAN * cosAP * cosI) * y;
+          const zRot = sinAP * sinI * x + cosAP * sinI * y;
 
-    orbitPoints.push(new THREE.Vector3(xRot, zRot, -yRot));
-  }
+          orbitPoints.push(new THREE.Vector3(xRot, zRot, -yRot));
+        }
 
-  const geometry = new THREE.BufferGeometry().setFromPoints(orbitPoints);
-  const material = new THREE.LineBasicMaterial({
-    color: planet.color,
-    opacity: 0.5,
-    transparent: true,
-  });
-  const orbit = new THREE.Line(geometry, material);
-  orbit.visible = !planet.isNEO;
-  scene.add(orbit);
-  orbits.push(orbit);
-  planet.orbit = orbit;
-});
+        const geometry = new THREE.BufferGeometry().setFromPoints(orbitPoints);
+        const material = new THREE.LineBasicMaterial({
+          color: planet.color,
+          opacity: 0.5,
+          transparent: true,
+        });
+        const orbit = new THREE.Line(geometry, material);
+        orbit.visible = !planet.isNEO;
+        scene.add(orbit);
+        orbits.push(orbit);
+        planet.orbit = orbit;
+      });
 
       for (let i = 0; i < dustCount * 3; i += 3) {
         // Random position within a sphere
@@ -582,47 +609,47 @@ const dustMaterial = new THREE.PointsMaterial({
         colors[i + 2] = 0.9 + Math.random() * 0.1; // B
       }
 
-        for (let i = 0; i < dustCount; i++) {
-  // Random radial distance (square root distribution for uniform density)
-  const radialDistance = Math.sqrt(Math.random()*3) * radius;
-  
-  // Random angle around the center of the disc
-  const theta = Math.random() * 2 * Math.PI;
+      for (let i = 0; i < dustCount; i++) {
+        // Random radial distance (square root distribution for uniform density)
+        const radialDistance = Math.sqrt(Math.random() * 3) * radius;
 
-  // Random height within the disc's thickness (height / 2 in both directions)
-  const y = (Math.random() - 0.5) * height;
+        // Random angle around the center of the disc
+        const theta = Math.random() * 2 * Math.PI;
 
-  // X and Z positions in the disc's plane (polar to Cartesian conversion)
-  const x = radialDistance * Math.cos(theta);
-  const z = radialDistance * Math.sin(theta);
+        // Random height within the disc's thickness (height / 2 in both directions)
+        const y = (Math.random() - 0.5) * height;
 
-  // Random concentration: Randomly "cluster" some particles
-  const clusterChance = Math.random();
-  if (clusterChance > 0.2) { // Adjust the threshold to increase/decrease clusters
-    const clusterRadius = 2000;  // Cluster size
-    const clusterX = (Math.random() - 0.5) * clusterRadius;
-    const clusterY = (Math.random() - 0.5) * clusterRadius;
-    const clusterZ = (Math.random() - 0.5) * clusterRadius;
+        // X and Z positions in the disc's plane (polar to Cartesian conversion)
+        const x = radialDistance * Math.cos(theta);
+        const z = radialDistance * Math.sin(theta);
 
-    positions[i * 3] = x + clusterX; // X position with clustering
-    positions[i * 3 + 1] = y + clusterY; // Y position with clustering
-    positions[i * 3 + 2] = z + clusterZ; // Z position with clustering
-  } else {
-    // Assign positions without clustering
-    positions[i * 3] = x;
-    positions[i * 3 + 1] = y;
-    positions[i * 3 + 2] = z;
-  }
+        // Random concentration: Randomly "cluster" some particles
+        const clusterChance = Math.random();
+        if (clusterChance > 0.2) { // Adjust the threshold to increase/decrease clusters
+          const clusterRadius = 2000;  // Cluster size
+          const clusterX = (Math.random() - 0.5) * clusterRadius;
+          const clusterY = (Math.random() - 0.5) * clusterRadius;
+          const clusterZ = (Math.random() - 0.5) * clusterRadius;
 
-//   // Assign colors (optional: randomize colors)
-//   colors[i * 3] = Math.random(); // R
-//   colors[i * 3 + 1] = Math.random(); // G
-//   colors[i * 3 + 2] = Math.random(); // B
-}
+          positions[i * 3] = x + clusterX; // X position with clustering
+          positions[i * 3 + 1] = y + clusterY; // Y position with clustering
+          positions[i * 3 + 2] = z + clusterZ; // Z position with clustering
+        } else {
+          // Assign positions without clustering
+          positions[i * 3] = x;
+          positions[i * 3 + 1] = y;
+          positions[i * 3 + 2] = z;
+        }
 
-// Create a Points object and add it to the scene
+        //   // Assign colors (optional: randomize colors)
+        //   colors[i * 3] = Math.random(); // R
+        //   colors[i * 3 + 1] = Math.random(); // G
+        //   colors[i * 3 + 2] = Math.random(); // B
+      }
 
-scene.add(dustCloud);
+      // Create a Points object and add it to the scene
+
+      scene.add(dustCloud);
 
       const controls = new THREE.OrbitControls(camera, renderer.domElement);
       camera.position.set(0, 50, 100);
@@ -727,77 +754,77 @@ scene.add(dustCloud);
       }
 
       function updatePlanetPositions(julianDate) {
-  planets.forEach((planet) => {
-    if (!planet.isMoon) {  // Handle non-moon objects first
-      if (!planet.isNEO || (planet.isNEO && showNEOs)) {
-        const elements = getOrbitalElements(planet, julianDate);
-        const E = keplerSolve(elements.e, elements.M);
+        planets.forEach((planet) => {
+          if (!planet.isMoon) {  // Handle non-moon objects first
+            if (!planet.isNEO || (planet.isNEO && showNEOs)) {
+              const elements = getOrbitalElements(planet, julianDate);
+              const E = keplerSolve(elements.e, elements.M);
 
-        const x = elements.a * (Math.cos(E) - elements.e);
-        const y = elements.a * Math.sqrt(1 - elements.e * elements.e) * Math.sin(E);
+              const x = elements.a * (Math.cos(E) - elements.e);
+              const y = elements.a * Math.sqrt(1 - elements.e * elements.e) * Math.sin(E);
 
-        const cosLAN = Math.cos(elements.omega);
-        const sinLAN = Math.sin(elements.omega);
-        const cosI = Math.cos(elements.i);
-        const sinI = Math.sin(elements.i);
-        const cosAP = Math.cos(elements.w);
-        const sinAP = Math.sin(elements.w);
+              const cosLAN = Math.cos(elements.omega);
+              const sinLAN = Math.sin(elements.omega);
+              const cosI = Math.cos(elements.i);
+              const sinI = Math.sin(elements.i);
+              const cosAP = Math.cos(elements.w);
+              const sinAP = Math.sin(elements.w);
 
-        const xRot = (cosLAN * cosAP - sinLAN * sinAP * cosI) * x + (-cosLAN * sinAP - sinLAN * cosAP * cosI) * y;
-        const yRot = (sinLAN * cosAP + cosLAN * sinAP * cosI) * x + (-sinLAN * sinAP + cosLAN * cosAP * cosI) * y;
-        const zRot = sinAP * sinI * x + cosAP * sinI * y;
+              const xRot = (cosLAN * cosAP - sinLAN * sinAP * cosI) * x + (-cosLAN * sinAP - sinLAN * cosAP * cosI) * y;
+              const yRot = (sinLAN * cosAP + cosLAN * sinAP * cosI) * x + (-sinLAN * sinAP + cosLAN * cosAP * cosI) * y;
+              const zRot = sinAP * sinI * x + cosAP * sinI * y;
 
-        planet.mesh.position.set(xRot, zRot, -yRot);
+              planet.mesh.position.set(xRot, zRot, -yRot);
+            }
+          }
+        });
+
+        // Handle moon separately after Earth's position is updated
+        planets.forEach((planet) => {
+          if (planet.isMoon) {
+            const parentPlanet = planets.find(p => p.name === "Earth");
+            if (parentPlanet) {
+              const elements = getOrbitalElements(planet, julianDate);
+              const E = keplerSolve(elements.e, elements.M);
+
+              const x = elements.a * (Math.cos(E) - elements.e);
+              const y = elements.a * Math.sqrt(1 - elements.e * elements.e) * Math.sin(E);
+
+              const cosLAN = Math.cos(elements.omega);
+              const sinLAN = Math.sin(elements.omega);
+              const cosI = Math.cos(elements.i);
+              const sinI = Math.sin(elements.i);
+              const cosAP = Math.cos(elements.w);
+              const sinAP = Math.sin(elements.w);
+
+              const xRot = (cosLAN * cosAP - sinLAN * sinAP * cosI) * x + (-cosLAN * sinAP - sinLAN * cosAP * cosI) * y;
+              const yRot = (sinLAN * cosAP + cosLAN * sinAP * cosI) * x + (-sinLAN * sinAP + cosLAN * cosAP * cosI) * y;
+              const zRot = sinAP * sinI * x + cosAP * sinI * y;
+
+              // Add parent planet's position to the moon's position
+              planet.mesh.position.set(
+                xRot + parentPlanet.mesh.position.x,
+                zRot + parentPlanet.mesh.position.y,
+                -yRot + parentPlanet.mesh.position.z
+              );
+
+              // Update moon's orbit position to follow Earth
+              if (planet.orbit) {
+                planet.orbit.position.copy(parentPlanet.mesh.position);
+              }
+            }
+          }
+        });
+
+        // Update labels for all objects
+        planets.forEach((planet) => {
+          if (planet.mesh.visible) {
+            const screenPosition = toScreenPosition(planet.mesh.position, camera);
+            labels[planet.name].style.left = `${screenPosition.x}px`;
+            labels[planet.name].style.top = `${screenPosition.y - 20}px`;
+          }
+        });
       }
-    }
-  });
-
-  // Handle moon separately after Earth's position is updated
-  planets.forEach((planet) => {
-    if (planet.isMoon) {
-      const parentPlanet = planets.find(p => p.name === "Earth");
-      if (parentPlanet) {
-        const elements = getOrbitalElements(planet, julianDate);
-        const E = keplerSolve(elements.e, elements.M);
-
-        const x = elements.a * (Math.cos(E) - elements.e);
-        const y = elements.a * Math.sqrt(1 - elements.e * elements.e) * Math.sin(E);
-
-        const cosLAN = Math.cos(elements.omega);
-        const sinLAN = Math.sin(elements.omega);
-        const cosI = Math.cos(elements.i);
-        const sinI = Math.sin(elements.i);
-        const cosAP = Math.cos(elements.w);
-        const sinAP = Math.sin(elements.w);
-
-        const xRot = (cosLAN * cosAP - sinLAN * sinAP * cosI) * x + (-cosLAN * sinAP - sinLAN * cosAP * cosI) * y;
-        const yRot = (sinLAN * cosAP + cosLAN * sinAP * cosI) * x + (-sinLAN * sinAP + cosLAN * cosAP * cosI) * y;
-        const zRot = sinAP * sinI * x + cosAP * sinI * y;
-
-        // Add parent planet's position to the moon's position
-        planet.mesh.position.set(
-          xRot + parentPlanet.mesh.position.x,
-          zRot + parentPlanet.mesh.position.y,
-          -yRot + parentPlanet.mesh.position.z
-        );
-
-        // Update moon's orbit position to follow Earth
-        if (planet.orbit) {
-          planet.orbit.position.copy(parentPlanet.mesh.position);
-        }
-      }
-    }
-  });
-
-  // Update labels for all objects
-  planets.forEach((planet) => {
-    if (planet.mesh.visible) {
-      const screenPosition = toScreenPosition(planet.mesh.position, camera);
-      labels[planet.name].style.left = `${screenPosition.x}px`;
-      labels[planet.name].style.top = `${screenPosition.y - 20}px`;
-    }
-  });
-}
 
 
       liveButton.addEventListener("click", () => {
@@ -1048,6 +1075,19 @@ scene.add(dustCloud);
         document.getElementById('addObjectForm').style.display = 'none';
       });
 
+      function updateDustCloud() {
+        const dustPositions = dustParticles.getAttribute('position').array;
+        const scaleFraction = scaleFactor / originalScaleFactor;
+
+        for (let i = 0; i < dustCount * 3; i += 3) {
+          dustPositions[i] *= scaleFraction;
+          dustPositions[i + 1] *= scaleFraction;
+          dustPositions[i + 2] *= scaleFraction;
+        }
+
+        dustParticles.getAttribute('position').needsUpdate = true;
+      }
+
       function animate() {
         requestAnimationFrame(animate);
         const deltaTime = clock.getDelta();
@@ -1186,6 +1226,57 @@ scene.add(dustCloud);
       animate();
     };
 
+    closeLookButton.addEventListener("click", () => {
+      isCloseLook = !isCloseLook;
+
+      // Reverse planet size
+      planets.forEach((planet) => {
+
+        planet.semiMajorAxis = planet.name === "Sun" ? 0 : planet.semiMajorAxis / scaleFactor;
+        // console.log(planet.name)
+      });
+      moon.semiMajorAxis /= scaleFactor;
+      scene.remove(moon.orbit);
+      scene.remove(dustCloud)
+
+      radius /= scaleFactor;
+
+
+      scaleFactor = isCloseLook ? closeLookScaleFactor : originalScaleFactor;
+
+      // Update planet size
+      planets.forEach((planet) => {
+        planet.semiMajorAxis = planet.name === "Sun" ? 0 : planet.semiMajorAxis * scaleFactor;
+        // console.log(planet.name)
+      });
+      
+      moon.semiMajorAxis *= scaleFactor;
+      radius *= scaleFactor;
+
+
+
+
+      // Remove and clear orbits
+      orbits.forEach((orbit) => {
+        // Dispose of the orbit's geometry and material
+        if (orbit.geometry) orbit.geometry.dispose();
+        if (orbit.material) orbit.material.dispose();
+        scene.remove(orbit);
+      });
+      orbits.splice(0, orbits.length);
+
+      // labels.splice(0, labels.length)
+
+      const label_divs = document.querySelectorAll('.label');
+
+      label_divs.forEach(label => {
+        label.remove();
+      });
+
+      executeAfterData();
+
+      closeLookButton.textContent = isCloseLook ? "Normal View" : "Close Look";
+    });
     executeAfterData();
   </script>
 </body>
