@@ -47,9 +47,11 @@
     "name": "Earth",
     "isNEO": "FALSE",
     "isPHA": "FALSE",
-    "texture": "/textures/earth/00_earthmap1k.jpg",
-    "specularMap": "./textures/earth/00_earthspec1k.jpg",
-    "bumpMap": "./textures/earth/00_earthbump1k.jpg",
+    "texture": "textures/earth/00_earthmap1k.jpg",
+    "specularMap": "textures/earth/02_earthspec1k.jpg",
+    "bumpMap": "textures/earth/01_earthbump1k.jpg",
+    "lightsMap": "textures/earth/03_earthlights1k.jpg" ,
+    "cloudsMap": "textures/earth/04_earthcloudmap.jpg", 
     "rotation period (hours)": 24,
     "rotation direction": "prograde"
 

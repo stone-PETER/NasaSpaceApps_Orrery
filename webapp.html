@@ -123,7 +123,60 @@
 
     <script src="https://cdn.jsdelivr.net/npm/three@latest/build/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@latest/examples/js/controls/OrbitControls.js"></script>
+
     <script>
+
+
+function getFresnelMat({rimHex = 0xffffff, facingHex = 0x000000} = {}) {
+  const uniforms = {
+    color1: { value: new THREE.Color(rimHex) },
+    color2: { value: new THREE.Color(facingHex) },
+    fresnelBias: { value: 0.1 },
+    fresnelScale: { value: 1.0 },
+    fresnelPower: { value: 4.0 },
+  };
+  const vs = `
+  uniform float fresnelBias;
+  uniform float fresnelScale;
+  uniform float fresnelPower;
+  
+  varying float vReflectionFactor;
+  
+  void main() {
+    vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
+    vec4 worldPosition = modelMatrix * vec4( position, 1.0 );
+  
+    vec3 worldNormal = normalize( mat3( modelMatrix[0].xyz, modelMatrix[1].xyz, modelMatrix[2].xyz ) * normal );
+  
+    vec3 I = worldPosition.xyz - cameraPosition;
+  
+    vReflectionFactor = fresnelBias + fresnelScale * pow( 1.0 + dot( normalize( I ), worldNormal ), fresnelPower );
+  
+    gl_Position = projectionMatrix * mvPosition;
+  }
+  `;
+  const fs = `
+  uniform vec3 color1;
+  uniform vec3 color2;
+  
+  varying float vReflectionFactor;
+  
+  void main() {
+    float f = clamp( vReflectionFactor, 0.0, 1.0 );
+    gl_FragColor = vec4(mix(color2, color1, vec3(f)), f);
+  }
+  `;
+  const fresnelMat = new THREE.ShaderMaterial({
+    uniforms: uniforms,
+    vertexShader: vs,
+    fragmentShader: fs,
+    transparent: true,
+    blending: THREE.AdditiveBlending,
+    // wireframe: true,
+  });
+  return fresnelMat;
+}
+
       const labels = {};
       const planets = [];
       const orbits = [];
@@ -163,13 +216,17 @@
       );
       const renderer = new THREE.WebGLRenderer({ antialias: true });
       const textureLoader = new THREE.TextureLoader();
-      const light = new THREE.PointLight(0xffffff, 4, 100, 0.01);
+      const light = new THREE.PointLight(0xffffff, 5, 430, 0.0001);
       const sunGeometry = new THREE.SphereGeometry(2, 32, 32);
       const sunMaterial = new THREE.MeshBasicMaterial({ color: 0xffa500 });
       const sun = new THREE.Mesh(sunGeometry, sunMaterial);
 
       renderer.setSize(window.innerWidth, window.innerHeight);
       document.body.appendChild(renderer.domElement);
+
+      
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.outputColorSpace = THREE.LinearSRGBColorSpace;
 
       light.position.set(0, 0, 0);
       scene.add(light);
@@ -209,18 +266,13 @@
     texture,
     rotationPeriod,
     rotationDirection,
-    normalMap,
+    lightsMap,
     specularMap,
     bumpMap,
-    displacementMap,
-    emissiveMap
+    cloudsMap,
 ) {
     
-    const normalMapTexture = textureLoader.load(normalMap || null);
-    const specularMapTexture = textureLoader.load(specularMap || null);
-    const bumpMapTexture = textureLoader.load(bumpMap || null);
-    const displacementMapTexture = textureLoader.load(displacementMap || null);
-    const emissiveMapTexture = textureLoader.load(emissiveMap || null);
+
 
     // const material = new THREE.MeshBasicMaterial({
     //     map: planetTexture,
@@ -236,8 +288,6 @@
     sunLight.position.set(0, 0, 0);
     scene.add(sunLight);
 
-
-
     const material = new THREE.MeshPhongMaterial({
         map: textureLoader.load(texture),
         specularMap: textureLoader.load(specularMap),
@@ -245,11 +295,39 @@
         bumpScale: 0.04,
         });
 
+
+
     const geometry = new THREE.SphereGeometry(size, 32, 32);
 
     const planet = new THREE.Mesh(geometry, material);
     planet.isNEO = isNEO;
     planet.isPHA = isPHA;
+
+    const planetMesh = new THREE.Mesh(geometry, material);
+    planet.add(planetMesh);
+
+    const lightsMat = new THREE.MeshBasicMaterial({
+    map: textureLoader.load(lightsMap),
+    blending: THREE.AdditiveBlending,
+    });
+    const lightsMesh = new THREE.Mesh(geometry, lightsMat);
+    planet.add(lightsMesh);
+
+    const cloudsMat = new THREE.MeshStandardMaterial({
+    map: textureLoader.load(cloudsMap),
+    transparent: true,
+    opacity: 0.8,
+    blending: THREE.AdditiveBlending,
+    // alphaTest: 0.3,
+    });
+    const cloudsMesh = new THREE.Mesh(geometry, cloudsMat);
+    cloudsMesh.scale.setScalar(1.003);
+    planet.add(cloudsMesh);
+
+    const fresnelMat = getFresnelMat();
+const glowMesh = new THREE.Mesh(geometry, fresnelMat);
+glowMesh.scale.setScalar(0.99999);
+planet.add(glowMesh);
 
     scene.add(planet);
 
@@ -679,6 +757,8 @@ togglePHAButton.addEventListener("click", () => {
                   );
                   labels[planet.name].style.left = `${screenPosition.x}px`;
                   labels[planet.name].style.top = `${screenPosition.y - 20}px`;
+
+                
                 }
               }
             });
@@ -715,6 +795,7 @@ togglePHAButton.addEventListener("click", () => {
         sunLight.position.z = 2 * Math.sin(angle);
 
 
+
           renderer.render(scene, camera);
         }
         function testRotation() {
@@ -732,6 +813,7 @@ togglePHAButton.addEventListener("click", () => {
             y: (-(vector.y * 0.5) + 0.5) * window.innerHeight,
           };
         }
+
 
         animate();
       };
