@@ -276,23 +276,23 @@
 
       const clock = new THREE.Clock();
       const dustParticles = new THREE.BufferGeometry();
-const dustCount = 9999999;
+const dustCount = 99999;
 const positions = new Float32Array(dustCount * 3);
 const colors = new Float32Array(dustCount * 3);
 
 // Disc parameters
-const radius =200;  // Radius of the disc
-const height = 7; // Maximum height of the disc (thickness)
+const radius =6000;  // Radius of the disc
+const height = 100; // Maximum height of the disc (thickness)
 
 dustParticles.setAttribute('position', new THREE.BufferAttribute(positions, 3));
 dustParticles.setAttribute('color', new THREE.BufferAttribute(colors, 3));
 
 // Material for the particles
 const dustMaterial = new THREE.PointsMaterial({
-  size: 0.02,
+  size: 0.5,
   vertexColors: true,
   transparent: true,
-  opacity: 0.5,
+  opacity: 0.3,
 });
 
     const dustCloud = new THREE.Points(dustParticles, dustMaterial);
@@ -599,7 +599,7 @@ const dustMaterial = new THREE.PointsMaterial({
   // Random concentration: Randomly "cluster" some particles
   const clusterChance = Math.random();
   if (clusterChance > 0.2) { // Adjust the threshold to increase/decrease clusters
-    const clusterRadius = 50;  // Cluster size
+    const clusterRadius = 2000;  // Cluster size
     const clusterX = (Math.random() - 0.5) * clusterRadius;
     const clusterY = (Math.random() - 0.5) * clusterRadius;
     const clusterZ = (Math.random() - 0.5) * clusterRadius;
