@@ -203,8 +203,8 @@ function getFresnelMat({rimHex = 0xffffff, facingHex = 0x000000} = {}) {
 
       const dustCloud = new THREE.Points(dustParticles, dustMaterial);
 
-      const scaleFactor = 10;
-      const sunGlowGeometry = new THREE.SphereGeometry(.6, 32, 32);
+      const scaleFactor = 429;
+      const sunGlowGeometry = new THREE.SphereGeometry(2.1, 32, 32);
       const sunGlowMaterial = new THREE.MeshBasicMaterial({
         color: 0xffff00,
         transparent: true,
@@ -216,7 +216,7 @@ function getFresnelMat({rimHex = 0xffffff, facingHex = 0x000000} = {}) {
         75,
         window.innerWidth / window.innerHeight,
         0.1,
-        1000
+        100000
       );
       const renderer = new THREE.WebGLRenderer({ antialias: true });
       const textureLoader = new THREE.TextureLoader();
@@ -458,6 +458,7 @@ function getFresnelMat({rimHex = 0xffffff, facingHex = 0x000000} = {}) {
           const geometry = new THREE.BufferGeometry().setFromPoints(
             orbitPoints
           );
+          console.log(geometry);
           const material = new THREE.LineBasicMaterial({
             color: planet.color,
             opacity: 0.5,
